@@ -11,11 +11,8 @@ import androidx.compose.material.icons.sharp.Android
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import ru.gfastg98.qr_scanner_compose.ui.theme.QR_scanner_composeTheme
 
 class StartActivity : ComponentActivity() {
@@ -28,9 +25,10 @@ class StartActivity : ComponentActivity() {
                 val context = LocalContext.current
                 Handler().postDelayed(
                     {
-                        context.startActivity(Intent(context, MainActivity::class.java))
+                        //context.startActivity(Intent(context, QRScannerActivity::class.java))
+                        context.startActivity(Intent(context,MainActivity::class.java))
                         finish()
-                    },5000)
+                    },3000)
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,

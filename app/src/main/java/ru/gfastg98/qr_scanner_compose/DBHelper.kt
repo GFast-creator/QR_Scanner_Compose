@@ -1,6 +1,7 @@
 package ru.gfastg98.qr_scanner_compose
 
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.provider.BaseColumns
@@ -15,14 +16,16 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 BaseColumns._ID to "INTEGER PRIMARY KEY",
                 "bitmap" to "BLOB",
                 "content" to "TEXT",
-                "generated" to "BOOLEAN"
+                "generated" to "BOOLEAN",
+                "barcode_obj_js" to "TEXT",
+                "code_format" to "INT"
             )
         }
     }
 
     companion object {
         // If you change the database schema, you must increment the database version.
-        const val DATABASE_VERSION = 1
+        const val DATABASE_VERSION = 4
         const val DATABASE_NAME = "QRCodesDataBase.db"
 
         private val SQL_CREATE_ENTRIES =
@@ -47,3 +50,13 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         onUpgrade(db, oldVersion, newVersion)
     }
 }
+
+fun SQLiteDatabase.query(
+    table:String,
+    columns: Array<String>,
+    selection : String? = null,
+    selectionArgs : Array<String>? = null,
+    groupBy : String? = null,
+    having : String? = null,
+    orderBy : String? = null
+) : Cursor = query(table, columns, selection, selectionArgs, groupBy, having, orderBy)

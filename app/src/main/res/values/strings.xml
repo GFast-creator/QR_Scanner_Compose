@@ -1,5 +1,7 @@
 <resources>
-    <string name="app_name">QR_scanner_compose</string>
-    <string name="title_activity_start">StartActivity</string>
-    <string name="title_activity_qrresult">QRResultActivity</string>
+    <string name="app_name">QR-код сканер</string>
+    <string name="title_activity_start">Загрузка…</string>
+    <string name="title_activity_qrresult">Результат</string>
+    <string name="title_activity_main">Основное окно</string>
+    <string name="title_activity_qrpicker">Выбор результата</string>
 </resources>
