@@ -2,12 +2,18 @@ package ru.gfastg98.qr_scanner_compose
 
 import android.app.Activity
 import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.ContentValues
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
+import android.util.Patterns
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -21,44 +27,37 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.TurnRight
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.unit.dp
-import ru.gfastg98.qr_scanner_compose.ui.theme.QR_scanner_composeTheme
-import java.io.ByteArrayOutputStream
-import android.content.ClipboardManager
-import android.content.Intent
-import android.net.Uri
-import android.os.Build
-import android.util.Patterns
-import android.widget.Toast
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.filled.TurnRight
-import androidx.compose.material3.IconButton
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri
 import com.google.gson.Gson
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.barcode.common.Barcode.GeoPoint
 import com.google.mlkit.vision.barcode.common.Barcode.UrlBookmark
+import ru.gfastg98.qr_scanner_compose.ui.theme.QR_scanner_composeTheme
+import java.io.ByteArrayOutputStream
 import java.io.File
 
 
@@ -85,11 +84,14 @@ private fun QRCodeViewer(intent: Intent) {
 
     val config = LocalConfiguration.current
 
+    if (intent.action in listOf(Intent.ACTION_SEND, Intent.ACTION_SENDTO)){
+        Log.e("kilo", intent.type?:"null")
+    }
 
     val f = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
     val filename = intent.getStringExtra("file_name") ?: "intent.png"
 
-
+    
 //            if (intent.action == Intent.ACTION_SEND) {
 //            } else {
     val bitmap = BitmapFactory.decodeFile(

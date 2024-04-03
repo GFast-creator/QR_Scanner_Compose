@@ -2,7 +2,6 @@ package ru.gfastg98.qr_scanner_compose.fragments
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.hardware.camera2.CameraManager
@@ -10,7 +9,6 @@ import android.media.Image
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.Parcelable
 import android.provider.MediaStore
 import android.util.Log
 import android.util.Size
@@ -64,66 +62,26 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.google.android.gms.common.util.concurrent.HandlerExecutor
 import com.google.gson.Gson
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.barcode.common.Barcode.ContactInfo
 import com.google.mlkit.vision.common.InputImage
 import ru.gfastg98.qr_scanner_compose.QRPickerActivity
 import ru.gfastg98.qr_scanner_compose.QRResultActivity
-import java.io.Serializable
 import java.util.concurrent.Executor
 
 
 class QRScannerActivity : ComponentActivity() {
 
-
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            Log.i("kilo", "Permission granted")
-        } else {
-            Log.i("kilo", "Permission denied")
-        }
-    }
-
-
     @OptIn(ExperimentalGetImage::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestCameraPermission()
         setContent {
-            QRCodeScannerPreview(
-            )
+            QRCodeScannerPreview()
         }
     }
-
-    private fun requestCameraPermission() {
-        when {
-            ContextCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                Log.i("kilo", "Permission previously granted")
-            }
-
-            ActivityCompat.shouldShowRequestPermissionRationale(
-                this,
-                android.Manifest.permission.CAMERA
-            ) -> Log.i("kilo", "Show camera permissions dialog")
-
-            else -> requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-        }
-    }
-}
-
-fun saveBitmap(bitmap: Bitmap, filename: String) {
-
 }
 
 fun showBitmapOnActivity(bitmap: Bitmap, barcode: Barcode, applicationContext: Context) {
@@ -194,7 +152,7 @@ fun QRCodeScannerPreview(
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
 
-    val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+    context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
 
     var cameraResolutionCoeff by remember {
         mutableStateOf<Pair<Float, Float>?>(null)
