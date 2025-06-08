@@ -46,6 +46,8 @@ import ru.gfastg98.qr_scanner_compose.DBHelper
 import ru.gfastg98.qr_scanner_compose.QRResultActivity
 import ru.gfastg98.qr_scanner_compose.query
 
+private val TAG = "DBSaveShowFragment"
+
 @Composable
 fun DBSaveShowFragment() {
     DBShow(generated = false)
@@ -147,7 +149,7 @@ fun DBShow(generated: Boolean = false) {
                                     if (selectedItems.contains(id))
                                         selectedItems -= id
                                     else selectedItems += id
-                                    Log.i("kilo", selectedItems.joinToString(", "))
+                                    Log.i(TAG, selectedItems.joinToString(", "))
                                 } else {
                                     if (QRGSaver().save(
                                         context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!

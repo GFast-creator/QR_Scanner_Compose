@@ -29,12 +29,15 @@ import kotlinx.coroutines.launch
 import ru.gfastg98.qr_scanner_compose.ui.theme.QR_scanner_composeTheme
 
 class StartActivity : ComponentActivity() {
+    companion object {
+        val TAG = StartActivity::class.java.simpleName
+    }
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            Log.i("kilo", "Permission granted")
+            Log.i(TAG, "Permission granted")
             Handler().postDelayed(
                 {
                     startActivity(
@@ -46,7 +49,7 @@ class StartActivity : ComponentActivity() {
                 }, 3000
             )
         } else {
-            Log.i("kilo", "Permission denied")
+            Log.i(TAG, "Permission denied")
         }
     }
 
@@ -115,14 +118,14 @@ class StartActivity : ComponentActivity() {
     private fun requestCameraPermission() {
         when {
             checkCameraPermission() -> {
-                Log.i("kilo", "Permission previously granted")
+                Log.i(TAG, "Permission previously granted")
                 return
             }
 
             ActivityCompat.shouldShowRequestPermissionRationale(
                 this,
                 android.Manifest.permission.CAMERA
-            ) -> Log.i("kilo", "Show camera permissions dialog")
+            ) -> Log.i(TAG, "Show camera permissions dialog")
 
             else -> requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
         }

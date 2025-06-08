@@ -59,6 +59,7 @@ import com.google.mlkit.vision.barcode.common.Barcode.UrlBookmark
 import ru.gfastg98.qr_scanner_compose.ui.theme.QR_scanner_composeTheme
 import java.io.ByteArrayOutputStream
 import java.io.File
+import androidx.core.net.toUri
 
 
 class QRResultActivity : ComponentActivity() {
@@ -73,6 +74,8 @@ class QRResultActivity : ComponentActivity() {
     }
 }
 
+private val TAG = QRResultActivity::class.java.simpleName
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun QRCodeViewer(intent: Intent) {
@@ -85,7 +88,7 @@ private fun QRCodeViewer(intent: Intent) {
     val config = LocalConfiguration.current
 
     if (intent.action in listOf(Intent.ACTION_SEND, Intent.ACTION_SENDTO)){
-        Log.e("kilo", intent.type?:"null")
+        Log.e(TAG, intent.type?:"null")
     }
 
     val f = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
@@ -98,7 +101,7 @@ private fun QRCodeViewer(intent: Intent) {
         f.toString()
                 + "/QRCODES/$filename"
     )
-    Log.e("kilo", f.toString())
+    Log.e(TAG, f.toString())
     val content = intent.getStringExtra("content") ?: ""
     val barcode_obj_js = intent.getStringExtra("barcode_obj") ?: ""
     Log.e("kilo oo", barcode_obj_js)
@@ -313,9 +316,7 @@ private fun QRCodeViewer(intent: Intent) {
                                     context.startActivity(
                                         Intent(Intent.ACTION_VIEW)
                                             .setData(
-                                                Uri.parse(
-                                                    "geo:${barcodeInfo.lat},${barcodeInfo.lng}?q=${barcodeInfo.lat},${barcodeInfo.lng}"
-                                                )
+                                                "geo:${barcodeInfo.lat},${barcodeInfo.lng}?q=${barcodeInfo.lat},${barcodeInfo.lng}".toUri()
                                             )
                                     )
                                 }
