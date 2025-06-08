@@ -18,16 +18,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-import ru.gfastg98.qr_scanner_compose.ui.theme.QR_scanner_composeTheme
+import ru.gfastg98.qr_scanner_compose.ui.theme.QRScannerTheme
 
+// FIXME : Требуеться большая переработка
 class StartActivity : ComponentActivity() {
     companion object {
         val TAG = StartActivity::class.java.simpleName
@@ -56,57 +56,65 @@ class StartActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        lifecycleScope.launch {
-            setContent {
-                QR_scanner_composeTheme {
-                    val openAlertDialog = remember { mutableStateOf(false) }
+        setContent {
+            QRScannerTheme {
+                val openAlertDialog = remember { mutableStateOf(false) }
 
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background,
-                    ) {
-                        Icon(imageVector = Icons.Sharp.Android, contentDescription = "Logo")
-                    }
-                    if (checkCameraPermission())
-                        if (openAlertDialog.value) {
-                            AlertDialog(
-                                icon = {
-                                    Icon(
-                                        Icons.Default.QuestionMark,
-                                        contentDescription = "Example Icon"
-                                    )
-                                },
-                                title = {
-                                    Text(text = "Разрешения")
-                                },
-                                text = {
-                                    Text(
-                                        text = "Для продолжения нужны выдать все следующие резрешения.\nЕсли вы самостоятельно" +
-                                                "отключали камеру, включите разрешение самостоятельно через настройки."
-                                    )
-                                },
-                                onDismissRequest = {
-                                    openAlertDialog.value = false
-                                },
-                                confirmButton = {
-                                    TextButton(
-                                        onClick = {
-                                            requestCameraPermission()
-                                            openAlertDialog.value = false
-                                        }
-                                    ) {
-                                        Text("Продолжить")
-                                    }
-                                },
-                                properties = DialogProperties(
-                                    dismissOnBackPress = false,
-                                    dismissOnClickOutside = false
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    Icon(imageVector = Icons.Sharp.Android, contentDescription = "Logo")
+                }
+
+                if (!checkCameraPermission()) {
+                    if (openAlertDialog.value) {
+                        AlertDialog(
+                            icon = {
+                                Icon(
+                                    Icons.Default.QuestionMark,
+                                    contentDescription = "Example Icon"
                                 )
+                            },
+                            title = {
+                                Text(text = "Разрешения")
+                            },
+                            text = {
+                                Text(
+                                    text = "Для продолжения нужны выдать все следующие резрешения.\nЕсли вы самостоятельно" +
+                                            "отключали камеру, включите разрешение самостоятельно через настройки."
+                                )
+                            },
+                            onDismissRequest = {
+                                openAlertDialog.value = false
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        requestCameraPermission()
+                                        openAlertDialog.value = false
+                                    }
+                                ) {
+                                    Text("Продолжить")
+                                }
+                            },
+                            properties = DialogProperties(
+                                dismissOnBackPress = false,
+                                dismissOnClickOutside = false
                             )
-                        }
+                        )
+                    }
+                } else {
+                    LaunchedEffect(Unit) {
+                        startActivity(
+                            Intent(
+                                this@StartActivity,
+                                MainActivity::class.java
+                            )
+                        )
+                    }
                 }
             }
-
         }
     }
 

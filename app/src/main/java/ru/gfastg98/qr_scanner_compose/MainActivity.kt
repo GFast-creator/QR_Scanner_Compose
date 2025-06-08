@@ -8,13 +8,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.DataSaverOff
-import androidx.compose.material.icons.filled.DataSaverOn
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.rounded.CameraAlt
 import androidx.compose.material.icons.rounded.DataSaverOff
-import androidx.compose.material.icons.rounded.DataSaverOn
 import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.DrawerValue
@@ -47,7 +45,7 @@ import ru.gfastg98.qr_scanner_compose.fragments.DBGenShowFragment
 import ru.gfastg98.qr_scanner_compose.fragments.DBSaveShowFragment
 import ru.gfastg98.qr_scanner_compose.fragments.QRCodeGeneratorFragment
 import ru.gfastg98.qr_scanner_compose.fragments.QRCodeScannerPreview
-import ru.gfastg98.qr_scanner_compose.ui.theme.QR_scanner_composeTheme
+import ru.gfastg98.qr_scanner_compose.ui.theme.QRScannerTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -57,25 +55,25 @@ class MainActivity : ComponentActivity() {
 
         val navItems = listOf(
             NavigationItem(
-                "Сканер",
+                getString(R.string.scanner),
                 Icons.Filled.CameraAlt,
                 Icons.Rounded.CameraAlt,
                 "scanner"
             ),
             NavigationItem(
-                "Сохранённые",
+                getString(R.string.saved),
                 Icons.Filled.Save,
                 Icons.Rounded.Save,
                 "db_scan"
             ),
             NavigationItem(
-                "Генератор",
+                getString(R.string.generator),
                 Icons.Filled.QrCodeScanner,
                 Icons.Rounded.QrCodeScanner,
                 "generator"
             ),
             NavigationItem(
-                "Сгенерированные",
+                getString(R.string.generated),
                 Icons.Filled.DataSaverOff,
                 Icons.Rounded.DataSaverOff,
                 "db_gen"
@@ -83,7 +81,7 @@ class MainActivity : ComponentActivity() {
         )
 
         setContent {
-            QR_scanner_composeTheme {
+            QRScannerTheme {
                 val navController = rememberNavController()
                 // A surface container using the 'background' color from the theme
                 Surface(
@@ -109,9 +107,9 @@ class MainActivity : ComponentActivity() {
                                         selected = index == selectedItemIndex,
                                         onClick = {
                                             navController.navigate(item.route){
-                                                popUpTo(navController.graph.findStartDestination().id){
+                                                /*popUpTo(navController.graph.findStartDestination().id){
                                                     saveState = true
-                                                }
+                                                }*/
                                                 launchSingleTop = true
                                                 restoreState = true
                                             }
