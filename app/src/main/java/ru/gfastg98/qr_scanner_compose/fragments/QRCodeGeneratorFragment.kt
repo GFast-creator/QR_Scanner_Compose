@@ -43,13 +43,14 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.gfastg98.qr_scanner_compose.QRResultActivity
+import androidx.core.graphics.scale
+
+private val TAG = "QRCodeGeneratorFragment"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun QRCodeGeneratorFragment() {
-
-
     Column {
         val context = LocalContext.current
         val isKeyboardOpen by keyboardAsState()
@@ -72,7 +73,7 @@ fun QRCodeGeneratorFragment() {
                     it.colorBlack = Color.WHITE
                     it.colorWhite = Color.BLACK
 
-                    Bitmap.createScaledBitmap(it.bitmap, 300, 300, false)
+                    it.bitmap.scale(300, 300, false)
                 }
         }
             if (content.isBlank())
@@ -101,7 +102,7 @@ fun QRCodeGeneratorFragment() {
             onClick = {
                 val filename = "intent"
                 Log.i(
-                    "kilo", if (QRGSaver().save(
+                    TAG, if (QRGSaver().save(
                             context.getExternalFilesDir(
                                 Environment.DIRECTORY_PICTURES
                             )!!.path + "/QRCODES/",

@@ -84,6 +84,8 @@ class QRScannerActivity : ComponentActivity() {
     }
 }
 
+private val TAG = QRScannerActivity::class.java.simpleName
+
 fun showBitmapOnActivity(bitmap: Bitmap, barcode: Barcode, applicationContext: Context) {
     val b = with(barcode.boundingBox!!) {
         val r1 = (left - 60).coerceAtLeast(0)
@@ -100,7 +102,7 @@ fun showBitmapOnActivity(bitmap: Bitmap, barcode: Barcode, applicationContext: C
 
     val filename = "intent"
     Log.i(
-        "kilo", if (QRGSaver().save(
+        TAG, if (QRGSaver().save(
                 applicationContext.getExternalFilesDir(
                     Environment.DIRECTORY_PICTURES
                 )!!.path + "/QRCODES/", filename, b, QRGContents.ImageType.IMAGE_PNG
@@ -128,7 +130,7 @@ fun showBitmapOnActivity(bitmap: Bitmap, barcode: Barcode, applicationContext: C
                     else -> null
                 }?.let { obj ->
                     putExtra("barcode_obj", obj)
-                    Log.e("kilo", obj)
+                    Log.e(TAG, obj)
                 }
 
                 putExtra("code_format", barcode.valueType)
@@ -268,7 +270,7 @@ fun QRCodeScannerPreview(
                                     }
                                     .addOnFailureListener {
                                         //Toast.makeText(applicationContext,it.message,Toast.LENGTH_SHORT).show()
-                                        it.message?.let { it1 -> Log.e("kilo", it1) }
+                                        it.message?.let { it1 -> Log.e(TAG, it1) }
                                         fin()
                                     }
                                     .addOnCompleteListener { fin() }
