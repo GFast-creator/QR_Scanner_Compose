@@ -4,4 +4,8 @@
     <string name="title_activity_qrresult">Результат</string>
     <string name="title_activity_main">Основное окно</string>
     <string name="title_activity_qrpicker">Выбор результата</string>
+    <string name="scanner">Сканер</string>
+    <string name="saved">Сохранённые</string>
+    <string name="generator">Генератор</string>
+    <string name="generated">Сгенерированные</string>
 </resources>

@@ -57,19 +57,22 @@ fun DBSaveShowFragment() {
 @Composable
 fun DBShow(generated: Boolean = false) {
     val context = LocalContext.current
-    val db = DBHelper(context).readableDatabase
+    val db = remember { DBHelper(context).readableDatabase }
 
-    val query = {
-        db.query(
-            DBHelper.Contract.QRCodeEntry.TABLE_NAME,
-            arrayOf("_id", "bitmap", "content","barcode_obj_js", "code_format"),
-            "generated = ${generated.toString().uppercase()}"
-        )
+    val query = remember {
+        {
+            db.query(
+                DBHelper.Contract.QRCodeEntry.TABLE_NAME,
+                arrayOf("_id", "bitmap", "content", "barcode_obj_js", "code_format"),
+                "generated = ${generated.toString().uppercase()}"
+            )
+        }
     }
-    var cursor = query()
+
+    var cursor by remember { mutableStateOf(query()) }
 
     Column {
-        if (cursor.count < 1){
+        if (cursor.count < 1) {
 
             Box(
                 contentAlignment = Alignment.Center,
@@ -84,62 +87,64 @@ fun DBShow(generated: Boolean = false) {
             }
         } else {
             cursor.moveToFirst()
-            var selectMode by remember {
-                mutableStateOf(false)
-            }
-            var selectedItems by remember {
-                mutableStateOf(emptyList<Int>())
-            }
+            var selectMode by remember { mutableStateOf(false) }
+            var selectedItems by remember { mutableStateOf(emptyList<Int>()) }
 
-            Row{
-                Button(onClick = {
-                    selectMode = !selectMode
-                    selectedItems = emptyList()
-                },
+            Row {
+                Button(
+                    onClick = {
+                        selectMode = !selectMode
+                        selectedItems = emptyList()
+                    },
                     colors = if (selectMode) ButtonDefaults.buttonColors(containerColor = Color.Red)
                     else ButtonDefaults.buttonColors()
                 ) {
-                    Icon(imageVector = Icons.Default.PhotoSizeSelectLarge,
-                        contentDescription = "Режим выбора элементов")
+                    Icon(
+                        imageVector = Icons.Default.PhotoSizeSelectLarge,
+                        contentDescription = "Режим выбора элементов"
+                    )
                 }
-                if(selectMode)
+                if (selectMode) {
                     Button(
                         onClick = {
                             val list = mutableListOf<String>()
                             for (selectedItem in selectedItems) {
-                                with(cursor){
+                                with(cursor) {
                                     moveToPosition(selectedItem)
                                     list += getInt(0).toString()
                                 }
                             }
                             db.delete(
                                 DBHelper.Contract.QRCodeEntry.TABLE_NAME,
-                                with("_id IN (${"?, ".repeat(selectedItems.size)}"){
-                                    removeRange(lastIndex-1..lastIndex) + ")"
-                                }, list.toTypedArray())
+                                with("_id IN (${"?, ".repeat(selectedItems.size)}") {
+                                    removeRange(lastIndex - 1..lastIndex) + ")"
+                                }, list.toTypedArray()
+                            )
                             cursor = query()
                             selectedItems = mutableListOf()
                             selectMode = false
                         },
                         enabled = selectedItems.isNotEmpty()
                     ) {
-                        Icon(imageVector = Icons.Default.Delete,
-                            contentDescription = "Удалить")
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Удалить"
+                        )
                     }
+                }
             }
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
                 modifier = Modifier
                     .weight(1f)
-            ){
-                var k = 0
-                items(cursor.count, key = {k++}){id ->
-
-                    val blob = cursor.getBlob(1)
-                    val content = cursor.getString(2)
-                    val barcode_obj = cursor.getString(3)
-                    val code_format = cursor.getInt(4)
+            ) {
+                items(cursor.count, key = { it }) { id ->
+                    cursor.moveToPosition(id)
+                    val blob = remember { cursor.getBlob(1) }
+                    val content = remember { cursor.getString(2) }
+                    val barcode_obj = remember { cursor.getString(3) }
+                    val code_format = remember { cursor.getInt(4) }
 
                     Card(
                         modifier = Modifier
@@ -152,12 +157,13 @@ fun DBShow(generated: Boolean = false) {
                                     Log.i(TAG, selectedItems.joinToString(", "))
                                 } else {
                                     if (QRGSaver().save(
-                                        context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-                                            .path+"/QRCODES/",
-                                        "intent",
-                                        BitmapFactory.decodeByteArray(blob,0,blob.size),
-                                        QRGContents.ImageType.IMAGE_PNG
-                                    )){
+                                            context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+                                                .path + "/QRCODES/",
+                                            "intent",
+                                            BitmapFactory.decodeByteArray(blob, 0, blob.size),
+                                            QRGContents.ImageType.IMAGE_PNG
+                                        )
+                                    ) {
                                         context.startActivity(
                                             Intent(
                                                 context,
@@ -172,13 +178,11 @@ fun DBShow(generated: Boolean = false) {
                                         )
                                     }
                                 }
-
                             }
                             .animateItemPlacement(),
                         colors = if (selectedItems.contains(id))
                             CardDefaults.cardColors(containerColor = Color.Red)
                         else CardDefaults.cardColors(),
-
                     ) {
                         Image(
                             bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.size)
@@ -191,7 +195,6 @@ fun DBShow(generated: Boolean = false) {
                         )
                         Text(content, Modifier.align(CenterHorizontally))
                     }
-                    cursor.moveToNext()
                 }
             }
         }

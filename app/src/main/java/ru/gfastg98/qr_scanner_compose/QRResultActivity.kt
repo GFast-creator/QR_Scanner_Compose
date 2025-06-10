@@ -56,7 +56,7 @@ import com.google.gson.Gson
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.barcode.common.Barcode.GeoPoint
 import com.google.mlkit.vision.barcode.common.Barcode.UrlBookmark
-import ru.gfastg98.qr_scanner_compose.ui.theme.QR_scanner_composeTheme
+import ru.gfastg98.qr_scanner_compose.ui.theme.QRScannerTheme
 import java.io.ByteArrayOutputStream
 import java.io.File
 import androidx.core.net.toUri
@@ -67,7 +67,7 @@ class QRResultActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            QR_scanner_composeTheme {
+            QRScannerTheme {
                 QRCodeViewer(intent)
             }
         }
