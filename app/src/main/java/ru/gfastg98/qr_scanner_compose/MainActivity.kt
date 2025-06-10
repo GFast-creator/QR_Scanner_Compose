@@ -28,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -35,7 +36,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
@@ -48,38 +49,37 @@ import ru.gfastg98.qr_scanner_compose.fragments.QRCodeScannerPreview
 import ru.gfastg98.qr_scanner_compose.ui.theme.QRScannerTheme
 
 class MainActivity : ComponentActivity() {
+    private val navigationItems
+        @Composable get() = listOf(
+        NavigationItem(
+            stringResource(R.string.scanner),
+            Icons.Filled.CameraAlt,
+            Icons.Rounded.CameraAlt,
+            "scanner"
+        ),
+        NavigationItem(
+            stringResource(R.string.saved),
+            Icons.Filled.Save,
+            Icons.Rounded.Save,
+            "db_scan"
+        ),
+        NavigationItem(
+            stringResource(R.string.generator),
+            Icons.Filled.QrCodeScanner,
+            Icons.Rounded.QrCodeScanner,
+            "generator"
+        ),
+        NavigationItem(
+            stringResource(R.string.generated),
+            Icons.Filled.DataSaverOff,
+            Icons.Rounded.DataSaverOff,
+            "db_gen"
+        )
+    )
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val navItems = listOf(
-            NavigationItem(
-                getString(R.string.scanner),
-                Icons.Filled.CameraAlt,
-                Icons.Rounded.CameraAlt,
-                "scanner"
-            ),
-            NavigationItem(
-                getString(R.string.saved),
-                Icons.Filled.Save,
-                Icons.Rounded.Save,
-                "db_scan"
-            ),
-            NavigationItem(
-                getString(R.string.generator),
-                Icons.Filled.QrCodeScanner,
-                Icons.Rounded.QrCodeScanner,
-                "generator"
-            ),
-            NavigationItem(
-                getString(R.string.generated),
-                Icons.Filled.DataSaverOff,
-                Icons.Rounded.DataSaverOff,
-                "db_gen"
-            )
-        )
-
         setContent {
             QRScannerTheme {
                 val navController = rememberNavController()
@@ -99,7 +99,7 @@ class MainActivity : ComponentActivity() {
                         drawerState = drawerState,
                         drawerContent = {
                             ModalDrawerSheet {
-                                navItems.forEachIndexed { index, item ->
+                                navigationItems.forEachIndexed { index, item ->
                                     NavigationDrawerItem(
                                         label = {
                                             Text(text = item.title)
@@ -132,7 +132,7 @@ class MainActivity : ComponentActivity() {
                             topBar = {
                                 TopAppBar(
                                     title = {
-                                        Text(navItems[selectedItemIndex].title)
+                                        Text(navigationItems[selectedItemIndex].title)
                                     },
                                     navigationIcon = {
                                         IconButton(onClick = { scope.launch { drawerState.open() } }) {

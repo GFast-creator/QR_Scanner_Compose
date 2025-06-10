@@ -40,12 +40,7 @@ class StartActivity : ComponentActivity() {
             Log.i(TAG, "Permission granted")
             Handler().postDelayed(
                 {
-                    startActivity(
-                        Intent(
-                            this@StartActivity,
-                            MainActivity::class.java
-                        )
-                    )
+                   toMainActivity()
                 }, 3000
             )
         } else {
@@ -106,12 +101,7 @@ class StartActivity : ComponentActivity() {
                     }
                 } else {
                     LaunchedEffect(Unit) {
-                        startActivity(
-                            Intent(
-                                this@StartActivity,
-                                MainActivity::class.java
-                            )
-                        )
+                        toMainActivity()
                     }
                 }
             }
@@ -137,5 +127,15 @@ class StartActivity : ComponentActivity() {
 
             else -> requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
         }
+    }
+
+    private fun toMainActivity() {
+        startActivity(
+            Intent(
+                this@StartActivity,
+                MainActivity::class.java
+            )
+        )
+        finish()
     }
 }

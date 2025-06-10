@@ -51,7 +51,6 @@ class QRPickerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
             var barcodes by remember {
                 mutableStateOf(emptyList<Barcode>())
             }
