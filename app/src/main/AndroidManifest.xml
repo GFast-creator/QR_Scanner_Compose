@@ -59,10 +59,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".fragments.QRScannerActivity"
-            android:exported="true"
-            android:theme="@style/Theme.QR_scanner_compose" />
         
         <provider
             android:authorities="${applicationId}.provider"
