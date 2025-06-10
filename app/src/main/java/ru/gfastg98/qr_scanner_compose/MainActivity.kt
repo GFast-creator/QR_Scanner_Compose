@@ -1,6 +1,7 @@
 package ru.gfastg98.qr_scanner_compose
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -42,6 +43,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.gfastg98.qr_scanner_compose.fragments.DBGenShowFragment
 import ru.gfastg98.qr_scanner_compose.fragments.DBSaveShowFragment
@@ -77,6 +79,8 @@ class MainActivity : ComponentActivity() {
                 "db_gen"
             )
         )
+
+    private var doubleTouch = false
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -169,7 +173,20 @@ class MainActivity : ComponentActivity() {
                     BackHandler {
                         if (drawerState.isOpen) {
                             scope.launch { drawerState.close() }
-                        }
+                        } else if (!doubleTouch) {
+                            Toast.makeText(
+                                this,
+                                "Нажмите ещё раз чтобы выйти...",
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                            doubleTouch = true
+
+                            scope.launch {
+                                delay(1500)
+                                doubleTouch = false
+                            }
+                        } else finish()
                     }
                 }
             }
