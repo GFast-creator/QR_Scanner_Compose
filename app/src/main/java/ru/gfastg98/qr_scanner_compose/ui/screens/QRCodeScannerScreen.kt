@@ -1,31 +1,26 @@
-package ru.gfastg98.qr_scanner_compose.fragments
+package ru.gfastg98.qr_scanner_compose.ui.screens
 
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
+import android.graphics.Matrix
 import android.media.Image
 import android.os.Build
-import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import android.util.Size
 import androidmads.library.qrgenearator.QRGContents
 import androidmads.library.qrgenearator.QRGSaver
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.compose.setContent
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
-import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
-import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -52,7 +47,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -62,7 +56,6 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.common.util.concurrent.HandlerExecutor
 import com.google.gson.Gson
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
@@ -71,85 +64,13 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import ru.gfastg98.qr_scanner_compose.QRPickerActivity
 import ru.gfastg98.qr_scanner_compose.QRResultActivity
+import ru.gfastg98.qr_scanner_compose.ui.components.CameraPreview
 import java.util.concurrent.Executor
 
-
-class QRScannerActivity : ComponentActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            QRCodeScannerPreview()
-        }
-    }
-}
-
-private val TAG = QRScannerActivity::class.java.simpleName
-
-fun showBitmapOnActivity(bitmap: Bitmap, barcode: Barcode, applicationContext: Context) {
-    val b = with(barcode.boundingBox!!) {
-        val r1 = (left - 60).coerceAtLeast(0)
-        val r2 = (top - 60).coerceAtLeast(0)
-        Bitmap.createBitmap(
-            bitmap,
-            r1,
-            r2,
-            (right - left + 120).coerceAtMost(bitmap.width - r1 - 1),
-            (bottom - top + 120).coerceAtMost(bitmap.height - r2 - 1)
-        )
-    }
-
-
-    val filename = "intent"
-    Log.i(
-        TAG, if (QRGSaver().save(
-                applicationContext.getExternalFilesDir(
-                    Environment.DIRECTORY_PICTURES
-                )!!.path + "/QRCODES/", filename, b, QRGContents.ImageType.IMAGE_PNG
-            )
-        ) "saved" else "no save"
-    )
-
-    applicationContext.startActivity(
-        Intent(
-            applicationContext,
-            QRResultActivity::class.java
-        )
-            .putExtra("file_name", "$filename.png")
-            .putExtra("content", barcode.displayValue)
-            .putExtra("generated", false)
-            .apply {
-                when (barcode.valueType) {
-                    Barcode.TYPE_CONTACT_INFO -> Gson().toJson(barcode.contactInfo)
-                    Barcode.TYPE_WIFI -> Gson().toJson(barcode.wifi)
-                    Barcode.TYPE_PHONE -> Gson().toJson(barcode.phone)
-                    Barcode.TYPE_URL -> Gson().toJson(barcode.url)
-                    Barcode.TYPE_EMAIL -> Gson().toJson(barcode.email)
-                    Barcode.TYPE_GEO -> Gson().toJson(barcode.geoPoint)
-                    Barcode.TYPE_CALENDAR_EVENT -> Gson().toJson(barcode.calendarEvent)
-                    else -> null
-                }?.let { obj ->
-                    putExtra("barcode_obj", obj)
-                    Log.e(TAG, obj)
-                }
-
-                putExtra("code_format", barcode.valueType)
-
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-    )
-}
-
-private fun Context.mainExecutor(): Executor {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        mainExecutor
-    } else {
-        HandlerExecutor(mainLooper)
-    }
-}
+private val TAG = "QRScannerActivity"
 
 @Composable
-fun QRCodeScannerPreview() {
+fun QRCodeScannerScreen() {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
 
@@ -245,7 +166,7 @@ fun QRCodeScannerPreview() {
                                         barcodeDetections = it
 
                                         if (takePictureFlag && it.isNotEmpty()) {
-                                            val m = android.graphics.Matrix()
+                                            val m = Matrix()
                                             m.postRotate(90f)
                                             val b = imageProxy.toBitmap()
                                             val bitmap = Bitmap.createBitmap(
@@ -429,27 +350,64 @@ fun QRCodeScannerPreview() {
     }
 }
 
+fun showBitmapOnActivity(bitmap: Bitmap, barcode: Barcode, applicationContext: Context) {
+    val b = with(barcode.boundingBox!!) {
+        val r1 = (left - 60).coerceAtLeast(0)
+        val r2 = (top - 60).coerceAtLeast(0)
+        Bitmap.createBitmap(
+            bitmap,
+            r1,
+            r2,
+            (right - left + 120).coerceAtMost(bitmap.width - r1 - 1),
+            (bottom - top + 120).coerceAtMost(bitmap.height - r2 - 1)
+        )
+    }
 
-@Composable
-fun CameraPreview(
-    controller: LifecycleCameraController,
-    cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA,
-    modifier: Modifier,
-) {
-    val lifecycleOwner = LocalLifecycleOwner.current
 
-    AndroidView(
-        modifier = modifier.alpha(0.99f),
-        factory = { context ->
-            PreviewView(context).apply {
-                this.controller = controller
-                controller.cameraSelector = cameraSelector
-                controller.unbind()
-                controller.bindToLifecycle(lifecycleOwner)
-                controller.previewTargetSize = CameraController.OutputSize(Size(1080, 1920))
-                controller.imageAnalysisTargetSize = CameraController.OutputSize(Size(720, 1280))
-                //controller.imageAnalysisTargetSize = CameraController.OutputSize(Size(1080, 1920))
-            }
-        }
+    val filename = "intent"
+    Log.i(
+        TAG, if (QRGSaver().save(
+                applicationContext.getExternalFilesDir(
+                    Environment.DIRECTORY_PICTURES
+                )!!.path + "/QRCODES/", filename, b, QRGContents.ImageType.IMAGE_PNG
+            )
+        ) "saved" else "no save"
     )
+
+    applicationContext.startActivity(
+        Intent(
+            applicationContext,
+            QRResultActivity::class.java
+        )
+            .putExtra("file_name", "$filename.png")
+            .putExtra("content", barcode.displayValue)
+            .putExtra("generated", false)
+            .apply {
+                when (barcode.valueType) {
+                    Barcode.TYPE_CONTACT_INFO -> Gson().toJson(barcode.contactInfo)
+                    Barcode.TYPE_WIFI -> Gson().toJson(barcode.wifi)
+                    Barcode.TYPE_PHONE -> Gson().toJson(barcode.phone)
+                    Barcode.TYPE_URL -> Gson().toJson(barcode.url)
+                    Barcode.TYPE_EMAIL -> Gson().toJson(barcode.email)
+                    Barcode.TYPE_GEO -> Gson().toJson(barcode.geoPoint)
+                    Barcode.TYPE_CALENDAR_EVENT -> Gson().toJson(barcode.calendarEvent)
+                    else -> null
+                }?.let { obj ->
+                    putExtra("barcode_obj", obj)
+                    Log.e(TAG, obj)
+                }
+
+                putExtra("code_format", barcode.valueType)
+
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+    )
+}
+
+private fun Context.mainExecutor(): Executor {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        mainExecutor
+    } else {
+        HandlerExecutor(mainLooper)
+    }
 }

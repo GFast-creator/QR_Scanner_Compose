@@ -1,4 +1,4 @@
-package ru.gfastg98.qr_scanner_compose.fragments
+package ru.gfastg98.qr_scanner_compose.ui.screens
 
 import android.content.Intent
 import android.graphics.BitmapFactory
@@ -49,13 +49,13 @@ import ru.gfastg98.qr_scanner_compose.query
 private val TAG = "DBSaveShowFragment"
 
 @Composable
-fun DBSaveShowFragment() {
-    DBShow(generated = false)
+fun SavedQrCodesDatabaseScreen() {
+    DatabaseTableScreen(generated = false)
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun DBShow(generated: Boolean = false) {
+fun DatabaseTableScreen(generated: Boolean = false) {
     val context = LocalContext.current
     val db = remember { DBHelper(context).readableDatabase }
 

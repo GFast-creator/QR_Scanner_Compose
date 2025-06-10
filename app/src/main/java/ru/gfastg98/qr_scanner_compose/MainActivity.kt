@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -39,16 +40,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import ru.gfastg98.qr_scanner_compose.fragments.DBGenShowFragment
-import ru.gfastg98.qr_scanner_compose.fragments.DBSaveShowFragment
-import ru.gfastg98.qr_scanner_compose.fragments.QRCodeGeneratorFragment
-import ru.gfastg98.qr_scanner_compose.fragments.QRCodeScannerPreview
+import ru.gfastg98.qr_scanner_compose.ui.screens.DBGenShowFragment
+import ru.gfastg98.qr_scanner_compose.ui.screens.QRCodeGeneratorScreen
+import ru.gfastg98.qr_scanner_compose.ui.screens.QRCodeScannerScreen
+import ru.gfastg98.qr_scanner_compose.ui.screens.SavedQrCodesDatabaseScreen
 import ru.gfastg98.qr_scanner_compose.ui.theme.QRScannerTheme
 
 class MainActivity : ComponentActivity() {
@@ -88,6 +89,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             QRScannerTheme {
                 val navController = rememberNavController()
+                LaunchedEffect(Unit) {
+                    navController.enableOnBackPressed(false)
+                }
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -109,9 +114,13 @@ class MainActivity : ComponentActivity() {
                                         selected = index == selectedItemIndex,
                                         onClick = {
                                             navController.navigate(item.route) {
+                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                    inclusive = true
+                                                }
                                                 launchSingleTop = true
                                                 restoreState = true
                                             }
+
                                             selectedItemIndex = index
                                             scope.launch { drawerState.close() }
                                         },
@@ -147,29 +156,23 @@ class MainActivity : ComponentActivity() {
                             NavHost(
                                 modifier = Modifier.padding(innerPadding),
                                 navController = navController,
-                                startDestination = "qr_code_scanner"
+                                startDestination = "scanner"
                             ) {
-                                navigation(
-                                    startDestination = "scanner",
-                                    route = "qr_code_scanner"
-                                ) {
-                                    composable("scanner") {
-                                        QRCodeScannerPreview()
-                                    }
-                                    composable("generator") {
-                                        QRCodeGeneratorFragment()
-                                    }
-                                    composable("db_scan") {
-                                        DBSaveShowFragment()
-                                    }
-                                    composable("db_gen") {
-                                        DBGenShowFragment()
-                                    }
+                                composable("scanner") {
+                                    QRCodeScannerScreen()
+                                }
+                                composable("generator") {
+                                    QRCodeGeneratorScreen()
+                                }
+                                composable("db_scan") {
+                                    SavedQrCodesDatabaseScreen()
+                                }
+                                composable("db_gen") {
+                                    DBGenShowFragment()
                                 }
                             }
                         }
                     }
-
                     BackHandler {
                         if (drawerState.isOpen) {
                             scope.launch { drawerState.close() }

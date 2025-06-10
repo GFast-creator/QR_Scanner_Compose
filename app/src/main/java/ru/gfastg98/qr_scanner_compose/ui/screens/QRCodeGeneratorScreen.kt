@@ -1,11 +1,9 @@
-package ru.gfastg98.qr_scanner_compose.fragments
+package ru.gfastg98.qr_scanner_compose.ui.screens
 
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.Rect
 import android.os.Environment
 import android.util.Log
-import android.view.ViewTreeObserver
 import androidmads.library.qrgenearator.QRGContents
 import androidmads.library.qrgenearator.QRGEncoder
 import androidmads.library.qrgenearator.QRGSaver
@@ -26,8 +24,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,25 +34,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.scale
 import ru.gfastg98.qr_scanner_compose.QRResultActivity
+import ru.gfastg98.qr_scanner_compose.ui.components.keyboardAsState
 
 private val TAG = "QRCodeGeneratorFragment"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
-fun QRCodeGeneratorFragment() {
+fun QRCodeGeneratorScreen() {
     Column {
         val context = LocalContext.current
         val isKeyboardOpen by keyboardAsState()
         val size by animateDpAsState(
             if (isKeyboardOpen == Keyboard.Opened) 200.dp
             else LocalConfiguration.current.screenWidthDp.dp,
-            label = ""
+            label = "qr code preview size animation"
         )
         var content by rememberSaveable { mutableStateOf("") }
 
@@ -66,15 +62,14 @@ fun QRCodeGeneratorFragment() {
             .background(androidx.compose.ui.graphics.Color.White)
             .align(CenterHorizontally)
 
-        val red = remember {
+        val render = remember {
             {
-                QRGEncoder(content, null, QRGContents.Type.TEXT, 2)
-                    .let {
-                        it.colorBlack = Color.WHITE
-                        it.colorWhite = Color.BLACK
+                QRGEncoder(content, null, QRGContents.Type.TEXT, 2).let {
+                    it.colorBlack = Color.WHITE
+                    it.colorWhite = Color.BLACK
 
-                        it.bitmap.scale(300, 300, false)
-                    }
+                    it.bitmap.scale(300, 300, false)
+                }
             }
         }
 
@@ -87,7 +82,7 @@ fun QRCodeGeneratorFragment() {
         } else {
             Image(
                 modifier = modifier,
-                bitmap = red().asImageBitmap(),
+                bitmap = render().asImageBitmap(),
                 contentDescription = "image of generated qrcode"
             )
         }
@@ -109,7 +104,7 @@ fun QRCodeGeneratorFragment() {
                                 Environment.DIRECTORY_PICTURES
                             )!!.path + "/QRCODES/",
                             filename,
-                            red(),
+                            render(),
                             QRGContents.ImageType.IMAGE_PNG
                         )
                     ) "saved" else "no save"
@@ -135,30 +130,4 @@ fun QRCodeGeneratorFragment() {
 
 enum class Keyboard {
     Opened, Closed
-}
-
-@Composable
-fun keyboardAsState(): State<Keyboard> {
-    val keyboardState = remember { mutableStateOf(Keyboard.Closed) }
-    val view = LocalView.current
-    DisposableEffect(view) {
-        val onGlobalListener = ViewTreeObserver.OnGlobalLayoutListener {
-            val rect = Rect()
-            view.getWindowVisibleDisplayFrame(rect)
-            val screenHeight = view.rootView.height
-            val keypadHeight = screenHeight - rect.bottom
-            keyboardState.value = if (keypadHeight > screenHeight * 0.15) {
-                Keyboard.Opened
-            } else {
-                Keyboard.Closed
-            }
-        }
-        view.viewTreeObserver.addOnGlobalLayoutListener(onGlobalListener)
-
-        onDispose {
-            view.viewTreeObserver.removeOnGlobalLayoutListener(onGlobalListener)
-        }
-    }
-
-    return keyboardState
 }
