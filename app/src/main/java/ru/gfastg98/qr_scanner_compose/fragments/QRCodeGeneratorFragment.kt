@@ -1,7 +1,6 @@
 package ru.gfastg98.qr_scanner_compose.fragments
 
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
 import android.os.Environment
@@ -42,8 +41,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import ru.gfastg98.qr_scanner_compose.QRResultActivity
 import androidx.core.graphics.scale
+import ru.gfastg98.qr_scanner_compose.QRResultActivity
 
 private val TAG = "QRCodeGeneratorFragment"
 
@@ -55,40 +54,43 @@ fun QRCodeGeneratorFragment() {
         val context = LocalContext.current
         val isKeyboardOpen by keyboardAsState()
         val size by animateDpAsState(
-            if (isKeyboardOpen == Keyboard.Opened) 200.dp else LocalConfiguration.current.screenWidthDp.dp,
+            if (isKeyboardOpen == Keyboard.Opened) 200.dp
+            else LocalConfiguration.current.screenWidthDp.dp,
             label = ""
         )
-        var content by rememberSaveable {
-            mutableStateOf("")
-        }
+        var content by rememberSaveable { mutableStateOf("") }
+
         val modifier = Modifier
             .animateContentSize(tween(300))
             .size(size)
             .background(androidx.compose.ui.graphics.Color.White)
             .align(CenterHorizontally)
 
-        val red = {
-            QRGEncoder(content, null, QRGContents.Type.TEXT, 2)
-                .let {
-                    it.colorBlack = Color.WHITE
-                    it.colorWhite = Color.BLACK
+        val red = remember {
+            {
+                QRGEncoder(content, null, QRGContents.Type.TEXT, 2)
+                    .let {
+                        it.colorBlack = Color.WHITE
+                        it.colorWhite = Color.BLACK
 
-                    it.bitmap.scale(300, 300, false)
-                }
-        }
-            if (content.isBlank())
-                Image(
-                    modifier = modifier,
-                    imageVector = Icons.Default.QrCode,
-                    contentDescription = "blank",
-                )
-            else {
-                Image(
-                    modifier = modifier,
-                    bitmap = red().asImageBitmap(),
-                    contentDescription = "image of generated qrcode"
-                )
+                        it.bitmap.scale(300, 300, false)
+                    }
             }
+        }
+
+        if (content.isBlank()) {
+            Image(
+                modifier = modifier,
+                imageVector = Icons.Default.QrCode,
+                contentDescription = "blank",
+            )
+        } else {
+            Image(
+                modifier = modifier,
+                bitmap = red().asImageBitmap(),
+                contentDescription = "image of generated qrcode"
+            )
+        }
 
         TextField(
             modifier = Modifier.fillMaxWidth(),

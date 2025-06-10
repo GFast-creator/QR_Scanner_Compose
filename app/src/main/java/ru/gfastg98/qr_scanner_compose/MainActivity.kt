@@ -2,6 +2,7 @@ package ru.gfastg98.qr_scanner_compose
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -51,31 +52,31 @@ import ru.gfastg98.qr_scanner_compose.ui.theme.QRScannerTheme
 class MainActivity : ComponentActivity() {
     private val navigationItems
         @Composable get() = listOf(
-        NavigationItem(
-            stringResource(R.string.scanner),
-            Icons.Filled.CameraAlt,
-            Icons.Rounded.CameraAlt,
-            "scanner"
-        ),
-        NavigationItem(
-            stringResource(R.string.saved),
-            Icons.Filled.Save,
-            Icons.Rounded.Save,
-            "db_scan"
-        ),
-        NavigationItem(
-            stringResource(R.string.generator),
-            Icons.Filled.QrCodeScanner,
-            Icons.Rounded.QrCodeScanner,
-            "generator"
-        ),
-        NavigationItem(
-            stringResource(R.string.generated),
-            Icons.Filled.DataSaverOff,
-            Icons.Rounded.DataSaverOff,
-            "db_gen"
+            NavigationItem(
+                stringResource(R.string.scanner),
+                Icons.Filled.CameraAlt,
+                Icons.Rounded.CameraAlt,
+                "scanner"
+            ),
+            NavigationItem(
+                stringResource(R.string.saved),
+                Icons.Filled.Save,
+                Icons.Rounded.Save,
+                "db_scan"
+            ),
+            NavigationItem(
+                stringResource(R.string.generator),
+                Icons.Filled.QrCodeScanner,
+                Icons.Rounded.QrCodeScanner,
+                "generator"
+            ),
+            NavigationItem(
+                stringResource(R.string.generated),
+                Icons.Filled.DataSaverOff,
+                Icons.Rounded.DataSaverOff,
+                "db_gen"
+            )
         )
-    )
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,16 +84,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             QRScannerTheme {
                 val navController = rememberNavController()
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                     val scope = rememberCoroutineScope()
-                    var selectedItemIndex by rememberSaveable {
-                        mutableIntStateOf(0)
-                    }
+                    var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
 
                     ModalNavigationDrawer(
                         modifier = Modifier.fillMaxSize(),
@@ -106,10 +104,7 @@ class MainActivity : ComponentActivity() {
                                         },
                                         selected = index == selectedItemIndex,
                                         onClick = {
-                                            navController.navigate(item.route){
-                                                /*popUpTo(navController.graph.findStartDestination().id){
-                                                    saveState = true
-                                                }*/
+                                            navController.navigate(item.route) {
                                                 launchSingleTop = true
                                                 restoreState = true
                                             }
@@ -144,26 +139,36 @@ class MainActivity : ComponentActivity() {
                                     }
                                 )
                             }
-                        ) {innerPadding ->
-                            NavHost(modifier = Modifier.padding(innerPadding), navController = navController, startDestination = "qr_code_scanner"){
+                        ) { innerPadding ->
+                            NavHost(
+                                modifier = Modifier.padding(innerPadding),
+                                navController = navController,
+                                startDestination = "qr_code_scanner"
+                            ) {
                                 navigation(
                                     startDestination = "scanner",
                                     route = "qr_code_scanner"
-                                ){
-                                    composable("scanner"){
+                                ) {
+                                    composable("scanner") {
                                         QRCodeScannerPreview()
                                     }
-                                    composable("generator"){
+                                    composable("generator") {
                                         QRCodeGeneratorFragment()
                                     }
-                                    composable("db_scan"){
+                                    composable("db_scan") {
                                         DBSaveShowFragment()
                                     }
-                                    composable("db_gen"){
+                                    composable("db_gen") {
                                         DBGenShowFragment()
                                     }
                                 }
                             }
+                        }
+                    }
+
+                    BackHandler {
+                        if (drawerState.isOpen) {
+                            scope.launch { drawerState.close() }
                         }
                     }
                 }

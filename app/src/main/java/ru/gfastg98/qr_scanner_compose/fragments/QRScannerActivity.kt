@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
-import android.hardware.camera2.CameraManager
 import android.media.Image
 import android.os.Build
 import android.os.Bundle
@@ -46,12 +45,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -75,7 +76,6 @@ import java.util.concurrent.Executor
 
 class QRScannerActivity : ComponentActivity() {
 
-    @OptIn(ExperimentalGetImage::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -120,11 +120,11 @@ fun showBitmapOnActivity(bitmap: Bitmap, barcode: Barcode, applicationContext: C
             .putExtra("generated", false)
             .apply {
                 when (barcode.valueType) {
-                    Barcode.TYPE_CONTACT_INFO ->  Gson().toJson(barcode.contactInfo)
+                    Barcode.TYPE_CONTACT_INFO -> Gson().toJson(barcode.contactInfo)
                     Barcode.TYPE_WIFI -> Gson().toJson(barcode.wifi)
                     Barcode.TYPE_PHONE -> Gson().toJson(barcode.phone)
                     Barcode.TYPE_URL -> Gson().toJson(barcode.url)
-                    Barcode.TYPE_EMAIL ->  Gson().toJson(barcode.email)
+                    Barcode.TYPE_EMAIL -> Gson().toJson(barcode.email)
                     Barcode.TYPE_GEO -> Gson().toJson(barcode.geoPoint)
                     Barcode.TYPE_CALENDAR_EVENT -> Gson().toJson(barcode.calendarEvent)
                     else -> null
@@ -149,25 +149,23 @@ private fun Context.mainExecutor(): Executor {
 }
 
 @Composable
-fun QRCodeScannerPreview(
-) {
+fun QRCodeScannerPreview() {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
 
-    context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+    var cameraResolutionCoeff by remember { mutableStateOf<Pair<Float, Float>?>(null) }
+    var takePictureFlag by remember { mutableStateOf(false) }
 
-    var cameraResolutionCoeff by remember {
-        mutableStateOf<Pair<Float, Float>?>(null)
+    val scanner = remember {
+        BarcodeScanning.getClient(
+            BarcodeScannerOptions.Builder()
+                .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
+                .build()
+        )
     }
-    var takePictureFlag by remember {
-        mutableStateOf(false)
+    LaunchedEffect(Unit) {
+        lifecycle.addObserver(scanner)
     }
-    val scanner = BarcodeScanning.getClient(
-        BarcodeScannerOptions.Builder()
-            .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
-            .build()
-    )
-    lifecycle.addObserver(scanner)
 
     val req = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
@@ -193,10 +191,7 @@ fun QRCodeScannerPreview(
                 )
             )
                 context.startActivity(
-                    Intent(
-                        context,
-                        QRPickerActivity::class.java
-                    )
+                    Intent(context, QRPickerActivity::class.java)
                         .putExtra("bitmap", "intent")
                 )
 
@@ -360,9 +355,7 @@ fun QRCodeScannerPreview(
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
-            var cameraTorchState by remember {
-                mutableStateOf(false)
-            }
+            var cameraTorchState by remember { mutableStateOf(false) }
             IconButton(
                 onClick = {
                     if (controller.cameraInfo!!.hasFlashUnit()) {
@@ -380,8 +373,7 @@ fun QRCodeScannerPreview(
             ) {
 
                 Icon(
-                    imageVector = if (cameraTorchState)
-                        Icons.Sharp.FlashOff else Icons.Sharp.FlashOn,
+                    imageVector = if (cameraTorchState) Icons.Sharp.FlashOff else Icons.Sharp.FlashOn,
                     contentDescription = "Open picture",
                     tint = Color.Gray,
                     modifier = Modifier
@@ -402,11 +394,9 @@ fun QRCodeScannerPreview(
                         bottom = 50.dp,
                         end = 25.dp
                     )
-                    //.border(1.dp, Color.Blue)
                     .align(Alignment.BottomEnd)
                     .size(50.dp)
             ) {
-
                 Icon(
                     imageVector = Icons.Sharp.FolderOpen,
                     contentDescription = "Open picture",
@@ -448,9 +438,9 @@ fun CameraPreview(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    AndroidView(modifier = modifier,
+    AndroidView(
+        modifier = modifier.alpha(0.99f),
         factory = { context ->
-
             PreviewView(context).apply {
                 this.controller = controller
                 controller.cameraSelector = cameraSelector
