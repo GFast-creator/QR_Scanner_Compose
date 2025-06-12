@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -52,6 +53,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import com.google.gson.Gson
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.barcode.common.Barcode.GeoPoint
@@ -59,7 +61,6 @@ import com.google.mlkit.vision.barcode.common.Barcode.UrlBookmark
 import ru.gfastg98.qr_scanner_compose.ui.theme.QRScannerTheme
 import java.io.ByteArrayOutputStream
 import java.io.File
-import androidx.core.net.toUri
 
 
 class QRResultActivity : ComponentActivity() {
@@ -81,20 +82,20 @@ private val TAG = QRResultActivity::class.java.simpleName
 private fun QRCodeViewer(intent: Intent) {
     val context = LocalContext.current
     val clipboardManager: ClipboardManager = context.getSystemService(
-        ComponentActivity.CLIPBOARD_SERVICE
+        Context.CLIPBOARD_SERVICE
     ) as ClipboardManager
     val dbHelper = DBHelper(context)
 
     val config = LocalConfiguration.current
 
-    if (intent.action in listOf(Intent.ACTION_SEND, Intent.ACTION_SENDTO)){
-        Log.e(TAG, intent.type?:"null")
+    if (intent.action in listOf(Intent.ACTION_SEND, Intent.ACTION_SENDTO)) {
+        Log.e(TAG, intent.type ?: "null")
     }
 
     val f = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
     val filename = intent.getStringExtra("file_name") ?: "intent.png"
 
-    
+
 //            if (intent.action == Intent.ACTION_SEND) {
 //            } else {
     val bitmap = BitmapFactory.decodeFile(
@@ -115,7 +116,7 @@ private fun QRCodeViewer(intent: Intent) {
     Scaffold(
         topBar = {
             TopAppBar(
-                colors = TopAppBarDefaults.smallTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
@@ -136,6 +137,11 @@ private fun QRCodeViewer(intent: Intent) {
                         ).also {
                             if (it.resolveActivity(context.packageManager) != null)
                                 context.startActivity(it)
+                            else Toast.makeText(
+                                context,
+                                "Нет приложения для отправки",
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     }) {
                         Icon(Icons.Default.TurnRight, null)
@@ -212,8 +218,9 @@ private fun QRCodeViewer(intent: Intent) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Button(modifier = Modifier
-                        .weight(1f),
+                    Button(
+                        modifier = Modifier
+                            .weight(1f),
                         shape = RoundedCornerShape(10),
                         onClick = {
                             intent.getStringExtra("content")?.let {
@@ -300,8 +307,9 @@ private fun QRCodeViewer(intent: Intent) {
                     }
 
                 if (barcodeInfo != null) {
-                    Button(modifier = Modifier
-                        .fillMaxWidth(),
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth(),
                         shape = RoundedCornerShape(10),
                         onClick = {
                             when (barcodeInfo) {
