@@ -73,7 +73,6 @@ fun DatabaseTableScreen(generated: Boolean = false) {
 
     Column {
         if (cursor.count < 1) {
-
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.fillMaxSize()
@@ -179,7 +178,7 @@ fun DatabaseTableScreen(generated: Boolean = false) {
                                     }
                                 }
                             }
-                            .animateItemPlacement(),
+                            .animateItem(),
                         colors = if (selectedItems.contains(id))
                             CardDefaults.cardColors(containerColor = Color.Red)
                         else CardDefaults.cardColors(),
