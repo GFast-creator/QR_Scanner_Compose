@@ -1,4 +1,4 @@
-package ru.gfastg98.qr_scanner_compose.ui.screens
+package ru.gfastg98.qr_scanner_compose.presentation.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable

@@ -1,4 +1,4 @@
-package ru.gfastg98.qr_scanner_compose.ui.components
+package ru.gfastg98.qr_scanner_compose.presentation.components
 
 import android.util.Size
 import androidx.camera.core.CameraSelector

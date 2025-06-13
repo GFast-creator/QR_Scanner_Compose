@@ -1,4 +1,4 @@
-package ru.gfastg98.qr_scanner_compose
+package ru.gfastg98.qr_scanner_compose.data
 
 import android.content.Context
 import android.database.Cursor

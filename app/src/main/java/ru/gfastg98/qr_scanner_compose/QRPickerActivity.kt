@@ -40,7 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
-import ru.gfastg98.qr_scanner_compose.ui.screens.showBitmapOnActivity
+import ru.gfastg98.qr_scanner_compose.presentation.screens.showBitmapOnActivity
 import ru.gfastg98.qr_scanner_compose.ui.theme.QRScannerTheme
 
 class QRPickerActivity : ComponentActivity() {

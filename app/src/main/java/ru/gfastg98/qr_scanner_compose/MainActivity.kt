@@ -46,10 +46,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import ru.gfastg98.qr_scanner_compose.ui.screens.DBGenShowFragment
-import ru.gfastg98.qr_scanner_compose.ui.screens.QRCodeGeneratorScreen
-import ru.gfastg98.qr_scanner_compose.ui.screens.QRCodeScannerScreen
-import ru.gfastg98.qr_scanner_compose.ui.screens.SavedQrCodesDatabaseScreen
+import ru.gfastg98.qr_scanner_compose.presentation.screens.DBGenShowFragment
+import ru.gfastg98.qr_scanner_compose.presentation.screens.QRCodeGeneratorScreen
+import ru.gfastg98.qr_scanner_compose.presentation.screens.QRCodeScannerScreen
+import ru.gfastg98.qr_scanner_compose.presentation.screens.SavedQrCodesDatabaseScreen
 import ru.gfastg98.qr_scanner_compose.ui.theme.QRScannerTheme
 
 class MainActivity : ComponentActivity() {

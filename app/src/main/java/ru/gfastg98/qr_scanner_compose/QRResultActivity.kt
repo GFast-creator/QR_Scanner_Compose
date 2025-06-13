@@ -44,12 +44,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
@@ -58,6 +60,7 @@ import com.google.gson.Gson
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.barcode.common.Barcode.GeoPoint
 import com.google.mlkit.vision.barcode.common.Barcode.UrlBookmark
+import ru.gfastg98.qr_scanner_compose.data.DBHelper
 import ru.gfastg98.qr_scanner_compose.ui.theme.QRScannerTheme
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -84,34 +87,33 @@ private fun QRCodeViewer(intent: Intent) {
     val clipboardManager: ClipboardManager = context.getSystemService(
         Context.CLIPBOARD_SERVICE
     ) as ClipboardManager
-    val dbHelper = DBHelper(context)
+    val dbHelper = remember { DBHelper(context) }
 
-    val config = LocalConfiguration.current
+    val config = LocalWindowInfo.current.containerSize
 
-    if (intent.action in listOf(Intent.ACTION_SEND, Intent.ACTION_SENDTO)) {
-        Log.e(TAG, intent.type ?: "null")
+    val f = remember { context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) }
+    val filename = intent.getStringExtra("file_name") ?: "intent.png"
+    val bitmap = remember { BitmapFactory.decodeFile("$f/QRCODES/$filename") }
+
+    val content = remember { intent.getStringExtra("content") ?: "" }
+    val barcodeObjectJson = remember { intent.getStringExtra("barcode_obj") ?: "" }
+
+
+    val uri = remember {
+        FileProvider.getUriForFile(
+            context,
+            "ru.gfastg98.qr_scanner_compose.provider",
+            File(f!!.path + "/QRCODES/$filename")
+        )
     }
 
-    val f = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-    val filename = intent.getStringExtra("file_name") ?: "intent.png"
-
-
-//            if (intent.action == Intent.ACTION_SEND) {
-//            } else {
-    val bitmap = BitmapFactory.decodeFile(
-        f.toString()
-                + "/QRCODES/$filename"
-    )
-    Log.e(TAG, f.toString())
-    val content = intent.getStringExtra("content") ?: ""
-    val barcode_obj_js = intent.getStringExtra("barcode_obj") ?: ""
-    Log.e("kilo oo", barcode_obj_js)
-
-    val uri = FileProvider.getUriForFile(
-        context,
-        "ru.gfastg98.qr_scanner_compose.provider",
-        File(f!!.path + "/QRCODES/$filename")
-    )
+    LaunchedEffect(Unit) {
+        Log.e(TAG, f.toString())
+        Log.e(TAG, barcodeObjectJson)
+        if (intent.action in listOf(Intent.ACTION_SEND, Intent.ACTION_SENDTO)) {
+            Log.e(TAG, intent.type ?: "null")
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -157,8 +159,8 @@ private fun QRCodeViewer(intent: Intent) {
             color = MaterialTheme.colorScheme.background
         ) {
 
-            val barcodeInfo =
-                barcode_obj_js.let {
+            val barcodeInfo = remember {
+                barcodeObjectJson.let {
                     val i = intent.getIntExtra("code_format", -1)
                     when (i) {
                         Barcode.TYPE_CONTACT_INFO -> Gson().fromJson(
@@ -185,6 +187,7 @@ private fun QRCodeViewer(intent: Intent) {
                         }
                     }
                 }
+            }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -196,7 +199,7 @@ private fun QRCodeViewer(intent: Intent) {
                     contentDescription = "mainImage",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
-                        .size(config.screenWidthDp.dp)
+                        .size(config.width.dp)
                 )
 
                 Box(
@@ -296,7 +299,7 @@ private fun QRCodeViewer(intent: Intent) {
                                     )
                                     put(
                                         "barcode_obj_js",
-                                        barcode_obj_js
+                                        barcodeObjectJson
                                     )
                                 }
                             )
