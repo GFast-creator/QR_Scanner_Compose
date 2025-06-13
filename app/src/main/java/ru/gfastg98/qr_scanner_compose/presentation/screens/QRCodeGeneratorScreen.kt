@@ -1,4 +1,4 @@
-package ru.gfastg98.qr_scanner_compose.ui.screens
+package ru.gfastg98.qr_scanner_compose.presentation.screens
 
 import android.content.Intent
 import android.graphics.Color
@@ -38,7 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.scale
 import ru.gfastg98.qr_scanner_compose.QRResultActivity
-import ru.gfastg98.qr_scanner_compose.ui.components.keyboardAsState
+import ru.gfastg98.qr_scanner_compose.presentation.components.keyboardAsState
 
 private val TAG = "QRCodeGeneratorFragment"
 

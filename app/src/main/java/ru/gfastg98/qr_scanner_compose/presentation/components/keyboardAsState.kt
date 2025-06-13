@@ -1,4 +1,4 @@
-package ru.gfastg98.qr_scanner_compose.ui.components
+package ru.gfastg98.qr_scanner_compose.presentation.components
 
 import android.graphics.Rect
 import android.view.ViewTreeObserver
@@ -8,7 +8,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalView
-import ru.gfastg98.qr_scanner_compose.ui.screens.Keyboard
+import ru.gfastg98.qr_scanner_compose.presentation.screens.Keyboard
 
 @Composable
 fun keyboardAsState(): State<Keyboard> {

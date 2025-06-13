@@ -1,4 +1,4 @@
-package ru.gfastg98.qr_scanner_compose.ui.screens
+package ru.gfastg98.qr_scanner_compose.presentation.screens
 
 import android.content.Intent
 import android.graphics.BitmapFactory
@@ -42,9 +42,9 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import ru.gfastg98.qr_scanner_compose.DBHelper
 import ru.gfastg98.qr_scanner_compose.QRResultActivity
-import ru.gfastg98.qr_scanner_compose.query
+import ru.gfastg98.qr_scanner_compose.data.DBHelper
+import ru.gfastg98.qr_scanner_compose.data.query
 
 private val TAG = "DBSaveShowFragment"
 

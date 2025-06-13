@@ -1,4 +1,4 @@
-package ru.gfastg98.qr_scanner_compose.ui.screens
+package ru.gfastg98.qr_scanner_compose.presentation.screens
 
 import android.content.Context
 import android.content.Intent
@@ -64,7 +64,7 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import ru.gfastg98.qr_scanner_compose.QRPickerActivity
 import ru.gfastg98.qr_scanner_compose.QRResultActivity
-import ru.gfastg98.qr_scanner_compose.ui.components.CameraPreview
+import ru.gfastg98.qr_scanner_compose.presentation.components.CameraPreview
 import java.util.concurrent.Executor
 
 private val TAG = "QRScannerActivity"
