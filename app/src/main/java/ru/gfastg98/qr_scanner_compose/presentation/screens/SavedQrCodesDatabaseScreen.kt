@@ -1,78 +1,64 @@
 package ru.gfastg98.qr_scanner_compose.presentation.screens
 
-import android.content.Intent
-import android.graphics.BitmapFactory
-import android.os.Environment
 import android.util.Log
-import androidmads.library.qrgenearator.QRGContents
-import androidmads.library.qrgenearator.QRGSaver
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PhotoSizeSelectLarge
 import androidx.compose.material.icons.filled.Terrain
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.decodeToImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import ru.gfastg98.qr_scanner_compose.QRResultActivity
-import ru.gfastg98.qr_scanner_compose.data.DBHelper
-import ru.gfastg98.qr_scanner_compose.data.query
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.androidx.compose.koinViewModel
+import ru.gfastg98.qr_scanner_compose.data.entity.QRCodeEntity
+import ru.gfastg98.qr_scanner_compose.domain.QRCodeDatabaseViewModel
+import ru.gfastg98.qr_scanner_compose.presentation.components.ScreenScope
 
-private val TAG = "DBSaveShowFragment"
+private const val TAG = "DBSaveShowFragment"
 
 @Composable
-fun SavedQrCodesDatabaseScreen() {
+fun ScreenScope.SavedQrCodesDatabaseScreen() {
     DatabaseTableScreen(generated = false)
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+
 @Composable
-fun DatabaseTableScreen(generated: Boolean = false) {
+fun ScreenScope.DatabaseTableScreen(generated: Boolean = false) {
     val context = LocalContext.current
-    val db = remember { DBHelper(context).readableDatabase }
-
-    val query = remember {
-        {
-            db.query(
-                DBHelper.Contract.QRCodeEntry.TABLE_NAME,
-                arrayOf("_id", "bitmap", "content", "barcode_obj_js", "code_format"),
-                "generated = ${generated.toString().uppercase()}"
-            )
-        }
-    }
-
-    var cursor by remember { mutableStateOf(query()) }
+    val vm = koinViewModel<QRCodeDatabaseViewModel>()
+    val table by remember { vm.queryTable(generated) }.collectAsStateWithLifecycle()
 
     Column {
-        if (cursor.count < 1) {
+        if (table.isEmpty()) {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.fillMaxSize()
@@ -80,55 +66,33 @@ fun DatabaseTableScreen(generated: Boolean = false) {
                 Image(
                     modifier = Modifier.size(DpSize(200.dp, 200.dp)),
                     imageVector = Icons.Default.Terrain,
-                    contentDescription = "no data to show"
+                    contentDescription = "no data to show",
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
                 )
                 Text("Нет сохраннённых QR-кодов")
             }
         } else {
-            cursor.moveToFirst()
-            var selectMode by remember { mutableStateOf(false) }
-            var selectedItems by remember { mutableStateOf(emptyList<Int>()) }
-
-            Row {
-                Button(
-                    onClick = {
-                        selectMode = !selectMode
-                        selectedItems = emptyList()
-                    },
-                    colors = if (selectMode) ButtonDefaults.buttonColors(containerColor = Color.Red)
-                    else ButtonDefaults.buttonColors()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PhotoSizeSelectLarge,
-                        contentDescription = "Режим выбора элементов"
-                    )
-                }
-                if (selectMode) {
-                    Button(
-                        onClick = {
-                            val list = mutableListOf<String>()
-                            for (selectedItem in selectedItems) {
-                                with(cursor) {
-                                    moveToPosition(selectedItem)
-                                    list += getInt(0).toString()
-                                }
+            var selectedItems = remember { mutableStateListOf<Int>() }
+            LaunchedEffect(selectedItems) {
+                actions {
+                    if (selectedItems.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                vm.deleteAll(
+                                    selectedItems.mapNotNull { id ->
+                                        table.find { i ->
+                                            i.uid == id
+                                        }
+                                    }
+                                )
+                                selectedItems.clear()
                             }
-                            db.delete(
-                                DBHelper.Contract.QRCodeEntry.TABLE_NAME,
-                                with("_id IN (${"?, ".repeat(selectedItems.size)}") {
-                                    removeRange(lastIndex - 1..lastIndex) + ")"
-                                }, list.toTypedArray()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Удалить"
                             )
-                            cursor = query()
-                            selectedItems = mutableListOf()
-                            selectMode = false
-                        },
-                        enabled = selectedItems.isNotEmpty()
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Удалить"
-                        )
+                        }
                     }
                 }
             }
@@ -138,64 +102,58 @@ fun DatabaseTableScreen(generated: Boolean = false) {
                 modifier = Modifier
                     .weight(1f)
             ) {
-                items(cursor.count, key = { it }) { id ->
-                    cursor.moveToPosition(id)
-                    val blob = remember { cursor.getBlob(1) }
-                    val content = remember { cursor.getString(2) }
-                    val barcode_obj = remember { cursor.getString(3) }
-                    val code_format = remember { cursor.getInt(4) }
-
-                    Card(
-                        modifier = Modifier
-                            .padding(5.dp, 0.dp, 0.dp, 5.dp)
-                            .clickable {
-                                if (selectMode) {
-                                    if (selectedItems.contains(id))
-                                        selectedItems -= id
-                                    else selectedItems += id
-                                    Log.i(TAG, selectedItems.joinToString(", "))
-                                } else {
-                                    if (QRGSaver().save(
-                                            context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-                                                .path + "/QRCODES/",
-                                            "intent",
-                                            BitmapFactory.decodeByteArray(blob, 0, blob.size),
-                                            QRGContents.ImageType.IMAGE_PNG
-                                        )
-                                    ) {
-                                        context.startActivity(
-                                            Intent(
-                                                context,
-                                                QRResultActivity::class.java
-                                            )
-                                                .putExtra("file_name", "intent.png")
-                                                .putExtra("content", content)
-                                                .putExtra("view", true)
-                                                .putExtra("barcode_obj", barcode_obj)
-                                                .putExtra("code_format", code_format)
-                                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                        )
-                                    }
-                                }
+                items(table, key = { it.uid }) { item ->
+                    QRCodeCard(
+                        item = item,
+                        isSelected = selectedItems.contains(item.uid),
+                        onLongClick = {
+                            if (selectedItems.isEmpty()) {
+                                selectedItems += item.uid
                             }
-                            .animateItem(),
-                        colors = if (selectedItems.contains(id))
-                            CardDefaults.cardColors(containerColor = Color.Red)
-                        else CardDefaults.cardColors(),
-                    ) {
-                        Image(
-                            bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.size)
-                                .asImageBitmap(),
-                            contentDescription = content,
-                            modifier = Modifier
-                                .padding(5.dp)
-                                .clip(RoundedCornerShape(20f))
-                                .align(CenterHorizontally)
-                        )
-                        Text(content, Modifier.align(CenterHorizontally))
-                    }
+                        },
+                        onClick = {
+                            if (selectedItems.isNotEmpty()) {
+                                if (selectedItems.contains(item.uid))
+                                    selectedItems -= item.uid
+                                else selectedItems += item.uid
+                                Log.i(TAG, selectedItems.joinToString(", "))
+                            } else {
+                                vm.fullView(context, item)
+                            }
+                        }
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun LazyGridItemScope.QRCodeCard(
+    item: QRCodeEntity,
+    isSelected: Boolean,
+    onLongClick: () -> Unit,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .padding(5.dp, 0.dp, 0.dp, 5.dp)
+            .combinedClickable(
+                onLongClick = onLongClick,
+                onClick = onClick
+            )
+            .animateItem(),
+        colors = if (isSelected) CardDefaults.cardColors(containerColor = Color.Red)
+        else CardDefaults.cardColors(),
+    ) {
+        Image(
+            bitmap = item.bitmap.decodeToImageBitmap(),
+            contentDescription = item.content,
+            modifier = Modifier
+                .padding(5.dp)
+                .clip(RoundedCornerShape(20f))
+                .align(CenterHorizontally)
+        )
+        Text(item.content, Modifier.align(CenterHorizontally))
     }
 }

@@ -8,7 +8,10 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalView
-import ru.gfastg98.qr_scanner_compose.presentation.screens.Keyboard
+
+enum class Keyboard {
+    Opened, Closed
+}
 
 @Composable
 fun keyboardAsState(): State<Keyboard> {
