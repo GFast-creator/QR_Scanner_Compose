@@ -6,28 +6,17 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.DataSaverOff
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.rounded.CameraAlt
 import androidx.compose.material.icons.rounded.DataSaverOff
 import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.material.icons.rounded.Save
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -41,16 +30,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import ru.gfastg98.qr_scanner_compose.domain.utils.showToast
+import ru.gfastg98.qr_scanner_compose.presentation.components.LocalNavigationState
 import ru.gfastg98.qr_scanner_compose.presentation.components.Screen
 import ru.gfastg98.qr_scanner_compose.presentation.screens.GeneratedQrCodeDatabaseScreen
+import ru.gfastg98.qr_scanner_compose.presentation.screens.MainScreen
 import ru.gfastg98.qr_scanner_compose.presentation.screens.QRCodeGeneratorScreen
 import ru.gfastg98.qr_scanner_compose.presentation.screens.QRCodeScannerScreen
 import ru.gfastg98.qr_scanner_compose.presentation.screens.SavedQrCodesDatabaseScreen
@@ -62,7 +52,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             QRScannerTheme {
-                MainScreen()
+                MainActivityScreen()
             }
         }
     }
@@ -75,126 +65,48 @@ private val navigationItems
             stringResource(R.string.scanner),
             Icons.Filled.CameraAlt,
             Icons.Rounded.CameraAlt,
-            "scanner"
+            Route.Scanner
         ),
         NavigationItem(
             stringResource(R.string.saved),
             Icons.Filled.Save,
             Icons.Rounded.Save,
-            "db_scan"
+            Route.DatabaseScanned
         ),
         NavigationItem(
             stringResource(R.string.generator),
             Icons.Filled.QrCodeScanner,
             Icons.Rounded.QrCodeScanner,
-            "generator"
+            Route.Generator
         ),
         NavigationItem(
             stringResource(R.string.generated),
             Icons.Filled.DataSaverOff,
             Icons.Rounded.DataSaverOff,
-            "db_gen"
+            Route.DatabaseGenerated
         )
     )
 
 @Composable
-private fun MainScreen() {
+private fun MainActivityScreen() {
     val context = LocalContext.current
     val activity = LocalActivity.current
 
     val navController = rememberNavController()
-    LaunchedEffect(Unit) {
-        navController.enableOnBackPressed(false)
-    }
-
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
 
     var doubleTouch by remember { mutableStateOf(false) }
 
     Screen {
-        navigationIcon {
-            IconButton(onClick = {
-                if (drawerState.isOpen)
-                    scope.launch { drawerState.close() }
-                else scope.launch { drawerState.open() }
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Menu,
-                    null
-                )
-            }
-        }
         content {
             val navItems = navigationItems
             LaunchedEffect(selectedItemIndex) {
                 title = navItems[selectedItemIndex].title
             }
-            ModalNavigationDrawer(
-                modifier = Modifier.fillMaxSize(),
-                drawerState = drawerState,
-                drawerContent = {
-                    ModalDrawerSheet {
-                        Text(
-                            stringResource(R.string.app_name),
-                            modifier = Modifier.padding(16.dp),
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        navigationItems.forEachIndexed { index, item ->
-                            NavigationDrawerItem(
-                                label = {
-                                    Text(text = item.title)
-                                },
-                                selected = index == selectedItemIndex,
-                                onClick = {
-                                    navController.navigate(item.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            inclusive = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-
-                                    selectedItemIndex = index
-                                    scope.launch { drawerState.close() }
-                                },
-                                icon = {
-                                    Icon(
-                                        imageVector = if (selectedItemIndex == index)
-                                            item.selectedItem else item.unselectedItem,
-                                        contentDescription = item.title
-                                    )
-                                }
-                            )
-                        }
-                    }
-                }
-            ) {
-                NavHost(
-                    modifier = Modifier,
-                    navController = navController,
-                    startDestination = "scanner"
-                ) {
-                    composable("scanner") {
-                        QRCodeScannerScreen()
-                    }
-                    composable("generator") {
-                        QRCodeGeneratorScreen()
-                    }
-                    composable("db_scan") {
-                        SavedQrCodesDatabaseScreen()
-                    }
-                    composable("db_gen") {
-                        GeneratedQrCodeDatabaseScreen()
-                    }
-                }
-            }
 
             BackHandler {
-                if (drawerState.isOpen) {
-                    scope.launch { drawerState.close() }
-                } else if (!doubleTouch) {
+                if (!doubleTouch) {
                     context.showToast("Нажмите ещё раз чтобы выйти...")
                     doubleTouch = true
 
@@ -202,15 +114,50 @@ private fun MainScreen() {
                         delay(1500)
                         doubleTouch = false
                     }
-                } else activity?.finish()
+                } else {
+                    activity?.finish()
+                }
+            }
+
+
+            CompositionLocalProvider(LocalNavigationState provides navController) {
+                NavHost(
+                    modifier = Modifier,
+                    navController = navController,
+                    startDestination = Route.MainScreen
+                ) {
+                    composable(Route.MainScreen::class) { MainScreen() }
+                    composable(Route.Scanner::class) { QRCodeScannerScreen() }
+                    composable(Route.Generator::class) { QRCodeGeneratorScreen() }
+                    composable(Route.DatabaseScanned::class) { SavedQrCodesDatabaseScreen() }
+                    composable(Route.DatabaseGenerated::class) { GeneratedQrCodeDatabaseScreen() }
+                }
             }
         }
     }
+}
+
+@Serializable
+sealed interface Route {
+    @Serializable
+    data object MainScreen : Route
+
+    @Serializable
+    data object Scanner : Route
+
+    @Serializable
+    data object Generator : Route
+
+    @Serializable
+    data object DatabaseScanned : Route
+
+    @Serializable
+    data object DatabaseGenerated : Route
 }
 
 data class NavigationItem(
     var title: String,
     var selectedItem: ImageVector,
     var unselectedItem: ImageVector,
-    val route: String
+    val route: Route
 )

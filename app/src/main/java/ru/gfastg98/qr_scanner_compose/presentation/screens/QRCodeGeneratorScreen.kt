@@ -5,11 +5,13 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.QrCode
 import androidx.compose.material3.Button
@@ -38,19 +40,26 @@ import ru.gfastg98.qr_scanner_compose.domain.utils.showToast
 import ru.gfastg98.qr_scanner_compose.presentation.components.Keyboard
 import ru.gfastg98.qr_scanner_compose.presentation.components.keyboardAsState
 
-private const val TAG = "QRCodeGeneratorFragment"
+private const val TAG = "QRCodeGeneratorScreen"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun QRCodeGeneratorScreen() {
-    Column {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(Color.Blue)
+            .padding(8.dp),
+        horizontalAlignment = CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         val vm = koinViewModel<QRCodeGeneratorViewModel>()
         val context = LocalContext.current
         val isKeyboardOpen by keyboardAsState()
         val size by animateDpAsState(
             if (isKeyboardOpen == Keyboard.Opened) 200.dp
-            else with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() },
+            else with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() - 20.dp },
             label = "qr code preview size animation"
         )
         var content by rememberSaveable { mutableStateOf("") }
@@ -62,7 +71,6 @@ fun QRCodeGeneratorScreen() {
             .animateContentSize(tween(300))
             .size(size)
             .background(Color.White)
-            .align(CenterHorizontally)
 
         if (bitmap == null) {
             Image(
@@ -79,14 +87,17 @@ fun QRCodeGeneratorScreen() {
         }
 
         TextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .imePadding(),
+            maxLines = 3,
             value = content,
+            label = { Text(text = "Данные") },
             onValueChange = { content = it }
         )
-        Spacer(modifier = Modifier.weight(1f))
+
         Button(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(10),
+            modifier = Modifier,
             onClick = {
                 if (bitmap != null) {
                     vm.viewFull(context, bitmap!!, content)

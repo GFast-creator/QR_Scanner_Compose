@@ -46,7 +46,7 @@ import ru.gfastg98.qr_scanner_compose.presentation.components.rememberQRCodeScan
 import ru.gfastg98.qr_scanner_compose.presentation.components.takePictureButtonState
 import java.util.concurrent.Executor
 
-private val TAG = "QRScannerActivity"
+private const val TAG = "QRCodeScannerScreen"
 
 @Composable
 fun QRCodeScannerScreen() {
@@ -73,9 +73,11 @@ fun QRCodeScannerScreen() {
     }
 
     var qrCodeCameraState = rememberQRCodeScannerState()
-    val state = takePictureButtonState {
-        qrCodeCameraState.isTakePictureRequired = it.isTouched
-    }
+    val state = takePictureButtonState(
+        onClick = {
+            qrCodeCameraState.isTakePictureRequired = it.isTouched
+        }
+    )
     var barcodeDetections by remember { mutableStateOf(emptyList<Barcode>()) }
     var cameraTorchState by remember { mutableStateOf(false) }
 

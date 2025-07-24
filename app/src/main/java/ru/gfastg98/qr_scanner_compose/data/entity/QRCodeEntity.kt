@@ -1,10 +1,12 @@
 package ru.gfastg98.qr_scanner_compose.data.entity
 
+import androidx.compose.runtime.Stable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import ru.gfastg98.qr_scanner_compose.data.entity.QRCodeEntity.Companion.TABLE_NAME
 
+@Stable
 @Entity(tableName = TABLE_NAME)
 data class QRCodeEntity(
     @PrimaryKey(autoGenerate = true) val uid: Int,

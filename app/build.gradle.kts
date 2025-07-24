@@ -4,6 +4,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp") version "2.1.0-1.0.29"
     id("androidx.room")
+    kotlin("plugin.serialization") version "2.2.0"
 }
 
 android {
@@ -77,16 +78,14 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 
+    // accompanist
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
+
     // core
     implementation("androidx.core:core-ktx:1.16.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.1")
     implementation("androidx.navigation:navigation-compose:2.9.0")
-
-    // sqlite
-    val sqliteVersion = "2.5.1"
-    implementation("androidx.sqlite:sqlite-framework:$sqliteVersion")
-    implementation("androidx.sqlite:sqlite-ktx:$sqliteVersion")
 
     // Gson
     implementation("com.google.code.gson:gson:2.11.0")
@@ -108,6 +107,9 @@ dependencies {
     implementation("io.insert-koin:koin-android:$koinVersion")
     implementation("io.insert-koin:koin-androidx-compose:$koinVersion")
     implementation("io.insert-koin:koin-androidx-workmanager:$koinVersion")
+
+    //serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
 
     // BoofCV
     implementation("org.boofcv:boofcv-core:1.2.2")

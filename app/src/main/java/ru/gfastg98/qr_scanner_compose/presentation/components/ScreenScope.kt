@@ -5,9 +5,13 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -92,13 +96,22 @@ class ScreenScope {
         this.leadScreen = leadScreen
     }
 
+    fun clear() {
+        fab = {}
+        bottomBar = {}
+        actions = {}
+        leadScreen = {}
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun Render() {
         Box(Modifier.fillMaxSize()) {
             Scaffold(
-                modifier = Modifier
-                    .fillMaxSize(),
+                contentWindowInsets = WindowInsets.systemBars.only(
+                    WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+                ),
+                modifier = Modifier.fillMaxSize(),
                 topBar = {
                     TopAppBar(
                         modifier = Modifier,
@@ -116,7 +129,7 @@ class ScreenScope {
                 },
                 bottomBar = bottomBar,
                 floatingActionButton = fab,
-                floatingActionButtonPosition = FabPosition.End
+                floatingActionButtonPosition = FabPosition.End,
             ) { innerPadding ->
                 Column(
                     modifier = Modifier

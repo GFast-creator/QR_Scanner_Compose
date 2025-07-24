@@ -11,11 +11,12 @@ import androidx.compose.ui.unit.IntRect
 import com.google.gson.Gson
 import com.google.mlkit.vision.barcode.common.Barcode
 import ru.gfastg98.qr_scanner_compose.QRResultActivity
+import ru.gfastg98.qr_scanner_compose.data.entity.QRCodeEntity
 
 private const val TAG = "BarcodeUtils"
 
 fun showBitmapOnActivity(
-    applicationContext: Context,
+    context: Context,
     bitmap: Bitmap,
     rect: IntRect,
     barcode: Barcode
@@ -28,12 +29,11 @@ fun showBitmapOnActivity(
         (rect.height).coerceAtMost(bitmap.height - rect.top)
     )
 
-
     val filename = "intent"
     Log.i(
         TAG,
         if (QRGSaver().save(
-                applicationContext.getExternalFilesDir(
+                context.getExternalFilesDir(
                     Environment.DIRECTORY_PICTURES
                 )!!.path + "/QRCODES/",
                 filename,
@@ -43,9 +43,9 @@ fun showBitmapOnActivity(
         ) "saved" else "no save"
     )
 
-    applicationContext.startActivity(
+    context.startActivity(
         Intent(
-            applicationContext,
+            context,
             QRResultActivity::class.java
         )
             .putExtra("file_name", "$filename.png")
@@ -67,6 +67,50 @@ fun showBitmapOnActivity(
                 }
             }
             .putExtra("code_format", barcode.valueType)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    )
+}
+
+fun showBitmapOnActivity(
+    applicationContext: Context,
+    bitmap: Bitmap,
+    rect: IntRect,
+    barcode: QRCodeEntity
+) {
+    val resultBitmap = Bitmap.createBitmap(
+        bitmap,
+        (rect.left).coerceAtLeast(0),
+        (rect.top).coerceAtLeast(0),
+        (rect.width).coerceAtMost(bitmap.width - rect.left),
+        (rect.height).coerceAtMost(bitmap.height - rect.top)
+    )
+
+    val saveResult = QRGSaver().save(
+        applicationContext.getExternalFilesDir(
+            Environment.DIRECTORY_PICTURES
+        )!!.path + "/QRCODES/",
+        "intent",
+        resultBitmap,
+        QRGContents.ImageType.IMAGE_PNG
+    )
+
+    if (!saveResult) {
+        Log.i(TAG, "not saved")
+        return
+    }
+
+    Log.e(TAG, barcode.barcodeObjectJson)
+
+    applicationContext.startActivity(
+        Intent(
+            applicationContext,
+            QRResultActivity::class.java
+        )
+            .putExtra("file_name", "intent.png")
+            .putExtra("content", barcode.content)
+            .putExtra("generated", barcode.generated)
+            .putExtra("barcode_obj", barcode.barcodeObjectJson)
+            .putExtra("code_format", barcode.codeFormat)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     )
 }

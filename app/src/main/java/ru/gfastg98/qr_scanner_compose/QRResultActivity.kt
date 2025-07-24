@@ -45,6 +45,7 @@ import com.google.mlkit.vision.barcode.common.Barcode.UrlBookmark
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import ru.gfastg98.qr_scanner_compose.domain.QRCodeResultViewModel
+import ru.gfastg98.qr_scanner_compose.presentation.components.QRCodeTypeIcon
 import ru.gfastg98.qr_scanner_compose.presentation.components.Screen
 import ru.gfastg98.qr_scanner_compose.ui.theme.QRScannerTheme
 
@@ -72,6 +73,7 @@ private fun QRCodeViewer() = Screen {
     val state by vm.state.collectAsStateWithLifecycle()
 
     val isForView = remember { !intent.getBooleanExtra("view", false) }
+    val type = remember { intent.getIntExtra("code_format", 0) }
 
     title = "QR-код"
 
@@ -104,9 +106,14 @@ private fun QRCodeViewer() = Screen {
 
             Box(
                 Modifier.weight(1f),
-                contentAlignment = Alignment.Center
             ) {
-                SelectionContainer {
+                QRCodeTypeIcon(
+                    modifier = Modifier.align(Alignment.TopEnd),
+                    type = type
+                )
+                SelectionContainer(
+                    Modifier.align(Alignment.Center)
+                ) {
                     Text(
                         when (val info = state.barcodeInfo) {
                             is GeoPoint -> {
