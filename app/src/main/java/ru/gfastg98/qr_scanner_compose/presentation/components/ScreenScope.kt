@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
@@ -138,6 +139,7 @@ class ScreenScope {
                             else this
                         }
                         .padding(innerPadding)
+                        .navigationBarsPadding()
                         .fillMaxWidth(),
                 ) {
                     content(this@ScreenScope)

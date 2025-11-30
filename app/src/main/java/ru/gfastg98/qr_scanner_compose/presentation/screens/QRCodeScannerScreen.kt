@@ -89,7 +89,7 @@ fun QRCodeScannerScreen() {
             },
             onPictureTaken = { bitmap, intRect, barcode ->
                 state.isTouched = false
-                showBitmapOnActivity(context, bitmap, intRect, barcode)
+                showBitmapOnActivity(context, bitmap, intRect, barcode, false)
             }
         )
 

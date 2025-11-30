@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.IntRect
 import com.google.gson.Gson
 import com.google.mlkit.vision.barcode.common.Barcode
 import ru.gfastg98.qr_scanner_compose.QRResultActivity
+import ru.gfastg98.qr_scanner_compose.QRResultActivity.Companion.EXTRA_CODE_FORMAT
 import ru.gfastg98.qr_scanner_compose.data.entity.QRCodeEntity
 
 private const val TAG = "BarcodeUtils"
@@ -19,14 +20,15 @@ fun showBitmapOnActivity(
     context: Context,
     bitmap: Bitmap,
     rect: IntRect,
-    barcode: Barcode
+    barcode: Barcode,
+    isView: Boolean,
 ) {
     val resultBitmap = Bitmap.createBitmap(
         bitmap,
-        (rect.left).coerceAtLeast(0),
-        (rect.top).coerceAtLeast(0),
-        (rect.width).coerceAtMost(bitmap.width - rect.left),
-        (rect.height).coerceAtMost(bitmap.height - rect.top)
+        (rect.left - 20).coerceAtLeast(0),
+        (rect.top - 20).coerceAtLeast(0),
+        (rect.width + 40).coerceAtMost(bitmap.width - rect.left),
+        (rect.height + 40).coerceAtMost(bitmap.height - rect.top)
     )
 
     val filename = "intent"
@@ -66,7 +68,8 @@ fun showBitmapOnActivity(
                     Log.e(TAG, obj)
                 }
             }
-            .putExtra("code_format", barcode.valueType)
+            .putExtra(EXTRA_CODE_FORMAT, barcode.valueType)
+            .putExtra("view", isView)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     )
 }
@@ -75,14 +78,15 @@ fun showBitmapOnActivity(
     applicationContext: Context,
     bitmap: Bitmap,
     rect: IntRect,
-    barcode: QRCodeEntity
+    barcode: QRCodeEntity,
+    isView: Boolean,
 ) {
     val resultBitmap = Bitmap.createBitmap(
         bitmap,
-        (rect.left).coerceAtLeast(0),
-        (rect.top).coerceAtLeast(0),
-        (rect.width).coerceAtMost(bitmap.width - rect.left),
-        (rect.height).coerceAtMost(bitmap.height - rect.top)
+        (rect.left - 20).coerceAtLeast(0),
+        (rect.top - 20).coerceAtLeast(0),
+        (rect.width + 40).coerceAtMost(bitmap.width - rect.left),
+        (rect.height + 40).coerceAtMost(bitmap.height - rect.top)
     )
 
     val saveResult = QRGSaver().save(
@@ -110,7 +114,8 @@ fun showBitmapOnActivity(
             .putExtra("content", barcode.content)
             .putExtra("generated", barcode.generated)
             .putExtra("barcode_obj", barcode.barcodeObjectJson)
-            .putExtra("code_format", barcode.codeFormat)
+            .putExtra(EXTRA_CODE_FORMAT, barcode.codeFormat)
+            .putExtra("view", isView)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     )
 }

@@ -1,5 +1,6 @@
 package ru.gfastg98.qr_scanner_compose.presentation.components
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddBusiness
@@ -21,7 +22,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import com.google.mlkit.vision.barcode.common.Barcode
+import ru.gfastg98.qr_scanner_compose.presentation.components.tip.tooltip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,11 +34,12 @@ fun QRCodeTypeIcon(
 ) {
     val icon = remember { getIconByType(type) } ?: return
     Surface(
-        modifier = modifier,
+        modifier = modifier.tooltip("Тип QR - кода"),
         shape = CircleShape,
         color = MaterialTheme.colorScheme.primary
     ) {
         Icon(
+            modifier = Modifier.padding(4.dp),
             imageVector = icon,
             contentDescription = "QR - code type"
         )

@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Environment
 import android.widget.Toast
 import androidx.core.content.FileProvider
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.gfastg98.qr_scanner_compose.BuildConfig
+import ru.gfastg98.qr_scanner_compose.QRResultActivity.Companion.EXTRA_CODE_FORMAT
 import ru.gfastg98.qr_scanner_compose.data.AppDatabase
 import ru.gfastg98.qr_scanner_compose.data.entity.QRCodeEntity
 import ru.gfastg98.qr_scanner_compose.domain.utils.processQRCodeInfo
@@ -24,7 +26,11 @@ class QRCodeResultViewModel(
     intent: Intent,
     private val db: AppDatabase
 ) : ViewModel() {
-    private val _state = MutableStateFlow<QRCodeResultState>(processIntent(context, intent))
+    private val clipboardManager =
+        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    private val _state = MutableStateFlow(
+        processIntent(context, intent)
+    )
     val state = _state.asStateFlow()
 
     fun processIntent(context: Context, intent: Intent): QRCodeResultState {
@@ -38,7 +44,7 @@ class QRCodeResultViewModel(
             content = intent.getStringExtra("content") ?: "",
             generated = intent.getBooleanExtra("generated", false),
             barcodeObjectJson = intent.getStringExtra("barcode_obj") ?: "",
-            codeFormat = intent.getIntExtra("code_format", -1)
+            codeFormat = intent.getIntExtra(EXTRA_CODE_FORMAT, -1)
         )
 
         val barcodeInfo = qrCodeEntity.processQRCodeInfo()
@@ -50,12 +56,11 @@ class QRCodeResultViewModel(
         )
     }
 
-    fun shareAction(context: Context, qrCodeEntity: QRCodeEntity) {
-        context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+    fun shareWithText(context: Context) {
         val uri = FileProvider.getUriForFile(
             context,
             "ru.gfastg98.qr_scanner_compose.provider",
-            _state.value.file!!
+            _state.value.file
         )
 
         Intent.createChooser(
@@ -63,7 +68,30 @@ class QRCodeResultViewModel(
                 .apply {
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     putExtra(Intent.EXTRA_STREAM, uri)
-                    putExtra(Intent.EXTRA_TEXT, qrCodeEntity.content)
+                    putExtra(Intent.EXTRA_TEXT, _state.value.qrCodeEntity.content)
+                    type = "text/plain"
+                },
+            "Поделиться текстом"
+        ).also {
+            if (it.resolveActivity(context.packageManager) != null)
+                context.startActivity(it)
+            else context.showToast("Нет приложения для отправки")
+        }
+    }
+
+    fun shareWithPhoto(context: Context) {
+        val uri = FileProvider.getUriForFile(
+            context,
+            "ru.gfastg98.qr_scanner_compose.provider",
+            _state.value.file
+        )
+
+        Intent.createChooser(
+            Intent(Intent.ACTION_SEND)
+                .apply {
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    putExtra(Intent.EXTRA_TEXT, _state.value.qrCodeEntity.content)
                     type = "*/*"
                 },
             "Отправить QR-код"
@@ -79,39 +107,35 @@ class QRCodeResultViewModel(
     }
 
     fun saveToDatabase() {
-        viewModelScope.launch { db.qrCodeDao().insertAll(_state.value.qrCodeEntity!!) }
+        viewModelScope.launch { db.qrCodeDao().insertAll(_state.value.qrCodeEntity) }
     }
 
     fun copyToClipboard(context: Context) {
-        _state.value.qrCodeEntity ?: return
-        val clipboardManager =
-            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-
-        clipboardManager.setPrimaryClip(
-            ClipData.newPlainText(
-                "Текст QR-кода",
-                _state.value.qrCodeEntity!!.content
-            )
+        val clipData = ClipData.newPlainText(
+            "Текст QR-кода",
+            _state.value.qrCodeEntity.content
         )
-        context.showToast("Скопировано")
+        clipboardManager.setPrimaryClip(clipData)
+
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
+            context.showToast("Текст скопирован")
     }
 
     fun copyToClipboardImage(context: Context) {
-        val clipboardManager =
-            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val uri = FileProvider.getUriForFile(
             context,
             "${BuildConfig.APPLICATION_ID}.provider",
-            _state.value.file!!
+            _state.value.file
         )
 
         clipboardManager.setPrimaryClip(
             ClipData.newUri(
                 context.contentResolver,
-                "QR code",
+                "Скопированный QR код",
                 uri
             )
         )
-        context.showToast("Картинка скопирована")
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2)
+            context.showToast("Картинка скопирована")
     }
 }

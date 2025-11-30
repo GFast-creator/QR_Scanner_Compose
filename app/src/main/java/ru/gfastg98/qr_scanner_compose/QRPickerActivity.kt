@@ -183,9 +183,11 @@ private fun QRCodePickerScreen() = Screen {
                                         it.bottom
                                     )
                                 },
-                                barcodes[pickedRes]
+                                barcodes[pickedRes],
+                                false
                             )
-                        }) {
+                        }
+                    ) {
                         Text("Сохранить выбранное и закрыть")
                     }
                 }

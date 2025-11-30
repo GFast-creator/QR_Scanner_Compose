@@ -1,10 +1,14 @@
 package ru.gfastg98.qr_scanner_compose.data.entity
 
+import android.graphics.Bitmap
 import androidx.compose.runtime.Stable
+import androidx.core.graphics.applyCanvas
+import androidx.core.graphics.createBitmap
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import ru.gfastg98.qr_scanner_compose.data.entity.QRCodeEntity.Companion.TABLE_NAME
+import java.io.ByteArrayOutputStream
 
 @Stable
 @Entity(tableName = TABLE_NAME)
@@ -46,3 +50,31 @@ data class QRCodeEntity(
         return result
     }
 }
+
+val mockQRCode = QRCodeEntity(
+    uid = 0,
+    bitmap = createBitmap(300, 300).applyCanvas {
+        drawRect(
+            android.graphics.Rect(0, 0, width, height),
+            android.graphics.Paint().apply {
+                color = android.graphics.Color.BLACK
+            }
+        )
+        drawCircle(
+            150f,
+            150f,
+            150f,
+            android.graphics.Paint().apply {
+                color = android.graphics.Color.BLUE
+            }
+        )
+    }.let {
+        val output = ByteArrayOutputStream()
+        it.compress(Bitmap.CompressFormat.PNG, 100, output)
+        output.toByteArray()
+    },
+    content = "test",
+    generated = true,
+    barcodeObjectJson = "{}",
+    codeFormat = 1,
+)

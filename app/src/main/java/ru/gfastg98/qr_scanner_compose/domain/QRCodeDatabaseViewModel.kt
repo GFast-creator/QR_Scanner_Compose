@@ -36,30 +36,8 @@ class QRCodeDatabaseViewModel(
             context,
             bitmap,
             IntRect(IntOffset(0, 0), IntOffset(bitmap.width, bitmap.height)),
-            item
+            item,
+            true
         )
-        /*if (
-            QRGSaver().save(
-                context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
-                    .path + "/QRCODES/",
-                "intent",
-                BitmapFactory.decodeByteArray(item.bitmap, 0, item.bitmap.size),
-                QRGContents.ImageType.IMAGE_PNG
-            )
-        ) {
-            context.startActivity(
-                Intent(
-                    context,
-                    QRResultActivity::class.java
-                ).putExtra("file_name", "intent.png")
-                    .putExtra("content", item.content)
-                    .putExtra("view", true)
-                    .putExtra("barcode_obj", item.barcodeObjectJson)
-                    .putExtra("code_format", item.codeFormat)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            )
-        } else {
-            Toast.makeText(context, "Ошибка при сохранении QR-кода", Toast.LENGTH_LONG).show()
-        }*/
     }
 }

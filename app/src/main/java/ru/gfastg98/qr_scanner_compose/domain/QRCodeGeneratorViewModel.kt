@@ -12,11 +12,13 @@ import androidmads.library.qrgenearator.QRGSaver
 import androidx.core.graphics.scale
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.mlkit.vision.barcode.common.Barcode
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.gfastg98.qr_scanner_compose.QRResultActivity
+import ru.gfastg98.qr_scanner_compose.QRResultActivity.Companion.EXTRA_CODE_FORMAT
 import ru.gfastg98.qr_scanner_compose.domain.utils.throttleFist
 
 
@@ -54,20 +56,18 @@ class QRCodeGeneratorViewModel : ViewModel() {
     fun viewFull(
         context: Context,
         bitmap: Bitmap,
-        content: String
+        content: String,
     ) {
         val filename = "intent"
-        Log.i(
-            TAG, if (QRGSaver().save(
-                    context.getExternalFilesDir(
-                        Environment.DIRECTORY_PICTURES
-                    )!!.path + "/QRCODES/",
-                    filename,
-                    bitmap,
-                    QRGContents.ImageType.IMAGE_PNG
-                )
-            ) "saved" else "no save"
+        val result = QRGSaver().save(
+            context.getExternalFilesDir(
+                Environment.DIRECTORY_PICTURES
+            )!!.path + "/QRCODES/",
+            filename,
+            bitmap,
+            QRGContents.ImageType.IMAGE_PNG
         )
+        Log.i(TAG, if (result) "saved" else "no save")
 
         context.startActivity(
             Intent(
@@ -77,7 +77,8 @@ class QRCodeGeneratorViewModel : ViewModel() {
                 .putExtra("file_name", "$filename.png")
                 .putExtra("content", content)
                 .putExtra("generated", true)
-                .also { it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
+                .putExtra(EXTRA_CODE_FORMAT, Barcode.TYPE_TEXT)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         )
     }
 }

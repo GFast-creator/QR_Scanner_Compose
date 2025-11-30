@@ -115,6 +115,9 @@ dependencies {
     implementation("org.boofcv:boofcv-core:1.2.2")
     implementation("org.boofcv:boofcv-android:1.2.2")
 
+    // Lottie
+    implementation("com.airbnb.android:lottie:6.7.1")
+
     // Tests
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
@@ -122,5 +125,4 @@ dependencies {
     androidTestImplementation(platform("androidx.compose:compose-bom:2025.06.00"))
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     debugImplementation("androidx.compose.ui:ui-tooling")
-
 }

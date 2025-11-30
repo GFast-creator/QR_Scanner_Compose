@@ -8,4 +8,7 @@
     <string name="saved">Сохранённые</string>
     <string name="generator">Генератор</string>
     <string name="generated">Сгенерированные</string>
+    <string name="StartActivity__dialog_substring">Для продолжения нужны выдать все следующие резрешения.\nЕсли вы самостоятельно отключали камеру, включите разрешение самостоятельно через настройки.</string>
+    <string name="StartActivity__dialog_title">Разрешения</string>
+    <string name="StartActivity_continue">Продолжить</string>
 </resources>
