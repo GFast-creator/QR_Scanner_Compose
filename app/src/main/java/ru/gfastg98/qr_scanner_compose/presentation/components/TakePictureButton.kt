@@ -42,7 +42,7 @@ class TakePictureButtonState private constructor() {
 
 @Composable
 fun takePictureButtonState(
-    onClick: (TakePictureButtonState) -> Unit = {}
+    onClick: (TakePictureButtonState) -> Unit = {},
 ) = remember { TakePictureButtonState(onClick) }
 
 @Composable
@@ -51,7 +51,7 @@ fun TakePictureButton(
     state: TakePictureButtonState = takePictureButtonState(),
 ) {
     val firstColor = MaterialTheme.colorScheme.primary
-    var density = LocalDensity.current
+    LocalDensity.current
     var size by remember { mutableStateOf(Size.Zero) }
     val animatedSize by animateSizeAsState(
         if (state.isTouched) Size(
@@ -70,6 +70,7 @@ fun TakePictureButton(
         else firstColor
     )
     val interactableSource = remember { MutableInteractionSource() }
+
     Box(
         modifier = modifier then Modifier
             .clickable(
@@ -83,24 +84,22 @@ fun TakePictureButton(
             }
             .drawWithCache {
                 onDrawBehind {
-                    with(density) {
-                        drawCircle(
-                            Color.White,
-                            radius = size.minDimension / 2f - 15f,
-                            style = Stroke(size.minDimension / 24f),
-                            colorFilter = ColorFilter.tint(firstColor)
-                        )
+                    drawCircle(
+                        Color.White,
+                        radius = size.minDimension / 2f - 15f,
+                        style = Stroke(size.minDimension / 24f),
+                        colorFilter = ColorFilter.tint(firstColor)
+                    )
 
-                        drawRoundRect(
-                            color = animatedColor,
-                            topLeft = Offset(
-                                size.minDimension / 2f - animatedSize.minDimension / 2f,
-                                size.minDimension / 2f - animatedSize.minDimension / 2f
-                            ),
-                            size = animatedSize,
-                            cornerRadius = CornerRadius(animatedRadius)
-                        )
-                    }
+                    drawRoundRect(
+                        color = animatedColor,
+                        topLeft = Offset(
+                            size.minDimension / 2f - animatedSize.minDimension / 2f,
+                            size.minDimension / 2f - animatedSize.minDimension / 2f
+                        ),
+                        size = animatedSize,
+                        cornerRadius = CornerRadius(animatedRadius)
+                    )
                 }
             }
     )

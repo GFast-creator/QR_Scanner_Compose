@@ -47,10 +47,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
+import ru.gfastg98.qr_scanner_compose.R
 import ru.gfastg98.qr_scanner_compose.Route
 import ru.gfastg98.qr_scanner_compose.domain.QRCodeDatabaseViewModel
 import ru.gfastg98.qr_scanner_compose.presentation.components.LocalNavigationState
@@ -73,45 +76,20 @@ fun ScreenScope.MainScreen() {
         floatingActionButton = {
             BackHandler(visible) { visible = false }
             Column(horizontalAlignment = Alignment.End) {
-                AnimatedVisibility(
-                    visible,
-                    enter = fadeIn() + slideInVertically(initialOffsetY = { 2 * it }),
-                    exit = fadeOut() + slideOutVertically(targetOffsetY = { 2 * it })
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            color = Color.White,
-                            text = "Сгенерировать"
-                        )
-                        SmallFloatingActionButton(
-                            onClick = { navigator.navigate(Route.Generator) }
-                        ) {
-                            Icon(imageVector = Icons.Default.BorderColor, null)
-                        }
-                    }
-                }
-
-                AnimatedVisibility(
-                    visible,
-                    enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
-                    exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            color = Color.White,
-                            text = "Скарнировать"
-                        )
-                        SmallFloatingActionButton(
-                            onClick = { navigator.navigate(Route.Scanner) }
-                        ) {
-                            Icon(imageVector = Icons.Default.CameraAlt, null)
-                        }
-                    }
-                }
+                FabRow(
+                    text = stringResource(R.string.generator),
+                    icon = Icons.Default.BorderColor,
+                    offset = { it * 2 },
+                    visible = visible,
+                    onClick = { navigator.navigate(Route.Generator) }
+                )
+                FabRow(
+                    text = stringResource(R.string.scanner),
+                    icon = Icons.Default.CameraAlt,
+                    offset = { it },
+                    visible = visible,
+                    onClick = { navigator.navigate(Route.Scanner) }
+                )
                 val animatedDpShape by animateIntAsState(
                     if (!visible) 20 else 100
                 )
@@ -119,16 +97,13 @@ fun ScreenScope.MainScreen() {
                     shape = RoundedCornerShape(animatedDpShape),
                     onClick = { visible = !visible }
                 ) {
-                    Row {
-                        //AnimatedVisibility(!visible) { Text(text = "Добавить") }
-                        Icon(imageVector = Icons.Default.Add, null)
-                    }
+                    Icon(imageVector = Icons.Default.Add, null)
                 }
             }
         },
         containerColor = Color.Transparent
-    ) { _ ->
-        Column(Modifier.padding()) {
+    ) { paddings ->
+        Column(Modifier.padding(paddings)) {
             if (table.isEmpty()) {
                 Box(
                     contentAlignment = Alignment.Center,
@@ -137,7 +112,7 @@ fun ScreenScope.MainScreen() {
                     Image(
                         modifier = Modifier.size(200.dp, 200.dp),
                         imageVector = Icons.Default.Terrain,
-                        contentDescription = "no data to show",
+                        contentDescription = null,
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
                     )
                     Text("Нет сохраннённых QR-кодов")
@@ -212,6 +187,35 @@ fun ScreenScope.MainScreen() {
                     .alpha(0.7f)
                     .background(Color.Black)
             )
+        }
+    }
+}
+
+@Composable
+fun FabRow(
+    text: String,
+    icon: ImageVector,
+    offset: (Int) -> Int = { it },
+    visible: Boolean,
+    onClick: () -> Unit,
+) {
+    AnimatedVisibility(
+        visible,
+        enter = fadeIn() + slideInVertically(initialOffsetY = offset),
+        exit = fadeOut() + slideOutVertically(targetOffsetY = offset)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                color = Color.White,
+                text = text
+            )
+            SmallFloatingActionButton(
+                onClick = onClick
+            ) {
+                Icon(imageVector = icon, null)
+            }
         }
     }
 }

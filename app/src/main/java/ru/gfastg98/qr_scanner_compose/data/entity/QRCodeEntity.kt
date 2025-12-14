@@ -41,9 +41,9 @@ data class QRCodeEntity(
     }
 
     override fun hashCode(): Int {
-        var result = uid
+        var result = uid.hashCode()
         result = 31 * result + generated.hashCode()
-        result = 31 * result + codeFormat
+        result = 31 * result + codeFormat.hashCode()
         result = 31 * result + bitmap.contentHashCode()
         result = 31 * result + content.hashCode()
         result = 31 * result + barcodeObjectJson.hashCode()

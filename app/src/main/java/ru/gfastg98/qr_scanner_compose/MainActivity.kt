@@ -1,6 +1,7 @@
 package ru.gfastg98.qr_scanner_compose
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
@@ -23,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -34,9 +34,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import ru.gfastg98.qr_scanner_compose.domain.utils.showToast
 import ru.gfastg98.qr_scanner_compose.presentation.components.LocalNavigationState
 import ru.gfastg98.qr_scanner_compose.presentation.components.Screen
 import ru.gfastg98.qr_scanner_compose.presentation.screens.GeneratedQrCodeDatabaseScreen
@@ -93,10 +91,15 @@ private fun MainActivityScreen() {
     val activity = LocalActivity.current
 
     val navController = rememberNavController()
-    val scope = rememberCoroutineScope()
     var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
 
     var doubleTouch by remember { mutableStateOf(false) }
+    LaunchedEffect(doubleTouch) {
+        if (doubleTouch) {
+            delay(1500)
+            doubleTouch = false
+        }
+    }
 
     Screen {
         content {
@@ -107,18 +110,12 @@ private fun MainActivityScreen() {
 
             BackHandler {
                 if (!doubleTouch) {
-                    context.showToast("Нажмите ещё раз чтобы выйти...")
+                    Toast.makeText(context, "Нажмите ещё раз чтобы выйти...", Toast.LENGTH_LONG)
                     doubleTouch = true
-
-                    scope.launch {
-                        delay(1500)
-                        doubleTouch = false
-                    }
                 } else {
                     activity?.finish()
                 }
             }
-
 
             CompositionLocalProvider(LocalNavigationState provides navController) {
                 NavHost(
@@ -159,5 +156,5 @@ data class NavigationItem(
     var title: String,
     var selectedItem: ImageVector,
     var unselectedItem: ImageVector,
-    val route: Route
+    val route: Route,
 )
