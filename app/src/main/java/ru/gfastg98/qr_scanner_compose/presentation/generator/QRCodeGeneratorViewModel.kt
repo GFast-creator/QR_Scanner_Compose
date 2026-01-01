@@ -1,4 +1,4 @@
-package ru.gfastg98.qr_scanner_compose.domain
+package ru.gfastg98.qr_scanner_compose.presentation.generator
 
 import android.content.Context
 import android.content.Intent
@@ -17,10 +17,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import ru.gfastg98.qr_scanner_compose.QRResultActivity
-import ru.gfastg98.qr_scanner_compose.QRResultActivity.Companion.EXTRA_CODE_FORMAT
 import ru.gfastg98.qr_scanner_compose.domain.utils.throttleFist
-
+import ru.gfastg98.qr_scanner_compose.presentation.activity.QRResultActivity
 
 class QRCodeGeneratorViewModel : ViewModel() {
     companion object {
@@ -77,7 +75,7 @@ class QRCodeGeneratorViewModel : ViewModel() {
                 .putExtra("file_name", "$filename.png")
                 .putExtra("content", content)
                 .putExtra("generated", true)
-                .putExtra(EXTRA_CODE_FORMAT, Barcode.TYPE_TEXT)
+                .putExtra(QRResultActivity.EXTRA_CODE_FORMAT, Barcode.TYPE_TEXT)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         )
     }

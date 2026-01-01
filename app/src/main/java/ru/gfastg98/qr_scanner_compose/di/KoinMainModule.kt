@@ -5,10 +5,11 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import ru.gfastg98.qr_scanner_compose.data.AppDatabase
-import ru.gfastg98.qr_scanner_compose.domain.QRCodeDatabaseViewModel
-import ru.gfastg98.qr_scanner_compose.domain.QRCodeGeneratorViewModel
-import ru.gfastg98.qr_scanner_compose.domain.QRCodeResultViewModel
-import ru.gfastg98.qr_scanner_compose.domain.QRCodeScannerViewModel
+import ru.gfastg98.qr_scanner_compose.presentation.generator.QRCodeGeneratorViewModel
+import ru.gfastg98.qr_scanner_compose.presentation.main.MainScreenViewModel
+import ru.gfastg98.qr_scanner_compose.presentation.qr_picker.QrPickerViewModel
+import ru.gfastg98.qr_scanner_compose.presentation.viewmodel.QRCodeResultViewModel
+import ru.gfastg98.qr_scanner_compose.presentation.viewmodel.QRCodeScannerViewModel
 
 val mainModule = module {
     single {
@@ -21,8 +22,9 @@ val mainModule = module {
             .build()
     }
 
-    viewModelOf(::QRCodeDatabaseViewModel)
+    viewModelOf(::MainScreenViewModel)
     viewModelOf(::QRCodeGeneratorViewModel)
     viewModelOf(::QRCodeResultViewModel)
     viewModelOf(::QRCodeScannerViewModel)
+    viewModelOf(::QrPickerViewModel)
 }

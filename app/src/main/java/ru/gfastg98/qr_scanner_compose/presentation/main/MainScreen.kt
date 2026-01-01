@@ -1,9 +1,8 @@
-package ru.gfastg98.qr_scanner_compose.presentation.screens
+package ru.gfastg98.qr_scanner_compose.presentation.main
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -19,22 +18,24 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.BorderColor
+import androidx.compose.material.icons.filled.AddHome
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Terrain
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.FloatingActionButtonMenu
+import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,51 +55,47 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 import ru.gfastg98.qr_scanner_compose.R
-import ru.gfastg98.qr_scanner_compose.Route
-import ru.gfastg98.qr_scanner_compose.domain.QRCodeDatabaseViewModel
+import ru.gfastg98.qr_scanner_compose.presentation.activity.Route
 import ru.gfastg98.qr_scanner_compose.presentation.components.LocalNavigationState
 import ru.gfastg98.qr_scanner_compose.presentation.components.QRCodeCard
 import ru.gfastg98.qr_scanner_compose.presentation.components.ScreenScope
 
 private const val TAG = "MainScreen"
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ScreenScope.MainScreen() {
     val navigator = LocalNavigationState.current
     val context = LocalContext.current
 
-    val vm = koinViewModel<QRCodeDatabaseViewModel>()
+    val vm = koinViewModel<MainScreenViewModel>()
     val table by vm.table.collectAsStateWithLifecycle()
-    var visible by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
 
     Scaffold(
-        floatingActionButtonPosition = FabPosition.EndOverlay,
+        floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
-            BackHandler(visible) { visible = false }
-            Column(horizontalAlignment = Alignment.End) {
-                FabRow(
-                    text = stringResource(R.string.generator),
-                    icon = Icons.Default.BorderColor,
-                    offset = { it * 2 },
-                    visible = visible,
+            FloatingActionButtonMenu(
+                expanded = expanded,
+                button = {
+                    ToggleFloatingActionButton(
+                        checked = expanded,
+                        onCheckedChange = { expanded = it }
+                    ) {
+                        Icon(Icons.Default.Edit, null)
+                    }
+                }
+            ) {
+                FloatingActionButtonMenuItem(
+                    text = { Text(stringResource(R.string.generator)) },
+                    icon = { Icon(Icons.Default.AddHome, null) },
                     onClick = { navigator.navigate(Route.Generator) }
                 )
-                FabRow(
-                    text = stringResource(R.string.scanner),
-                    icon = Icons.Default.CameraAlt,
-                    offset = { it },
-                    visible = visible,
+                FloatingActionButtonMenuItem(
+                    text = { Text(stringResource(R.string.scanner)) },
+                    icon = { Icon(Icons.Default.CameraAlt, null) },
                     onClick = { navigator.navigate(Route.Scanner) }
                 )
-                val animatedDpShape by animateIntAsState(
-                    if (!visible) 20 else 100
-                )
-                FloatingActionButton(
-                    shape = RoundedCornerShape(animatedDpShape),
-                    onClick = { visible = !visible }
-                ) {
-                    Icon(imageVector = Icons.Default.Add, null)
-                }
             }
         },
         containerColor = Color.Transparent
@@ -177,7 +174,7 @@ fun ScreenScope.MainScreen() {
             }
         }
         AnimatedVisibility(
-            visible,
+            expanded,
             enter = fadeIn(),
             exit = fadeOut()
         ) {

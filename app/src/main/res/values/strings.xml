@@ -11,4 +11,7 @@
     <string name="StartActivity__dialog_substring">Для продолжения нужны выдать все следующие резрешения.\nЕсли вы самостоятельно отключали камеру, включите разрешение самостоятельно через настройки.</string>
     <string name="StartActivity__dialog_title">Разрешения</string>
     <string name="StartActivity_continue">Продолжить</string>
+    <string name="LoadingDialog__loading">Загрузка...</string>
+    <string name="QrPicker__no_qr_codes_on_photo">Не найдено фото qr-кода</string>
+    <string name="QrPicker__error_while_processing">Ошибка при обработке</string>
 </resources>

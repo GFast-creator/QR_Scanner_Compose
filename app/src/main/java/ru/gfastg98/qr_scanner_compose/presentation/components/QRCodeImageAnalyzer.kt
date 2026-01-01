@@ -3,9 +3,13 @@ package ru.gfastg98.qr_scanner_compose.presentation.components
 import android.util.Log
 import android.util.Size
 import androidx.annotation.OptIn
+import androidx.camera.core.AspectRatio
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -36,7 +40,21 @@ val PREVIEW by lazy {
 
 val IMAGE_ANALYSIS by lazy {
     ImageAnalysis.Builder()
-        .setTargetResolution(Size(720, 1280))
+        .setResolutionSelector(
+            ResolutionSelector.Builder()
+                .setAspectRatioStrategy(
+                    AspectRatioStrategy(
+                        AspectRatio.RATIO_16_9,
+                        AspectRatioStrategy.FALLBACK_RULE_AUTO
+                    )
+                ).setResolutionStrategy(
+                    ResolutionStrategy(
+                        Size(720, 1280),
+                        ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                    )
+                ).build()
+        )
+
         /*.setResolutionSelector(
             ResolutionSelector.Builder()
                 .setResolutionStrategy(

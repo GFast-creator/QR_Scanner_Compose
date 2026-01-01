@@ -30,7 +30,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toComposeRect
 import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.roundToIntRect
@@ -40,8 +39,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.mlkit.vision.barcode.common.Barcode
-import ru.gfastg98.qr_scanner_compose.domain.utils.drawBarcodeSelection
 import ru.gfastg98.qr_scanner_compose.domain.utils.translate
+import ru.gfastg98.qr_scanner_compose.presentation.utils.drawBarcodeSelection
 
 
 private const val TAG = "QRCodeScanner"
@@ -58,7 +57,6 @@ fun QRCodeScanner(
     onPictureTaken: (Bitmap, IntRect, Barcode) -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    LocalContext.current
 
     var init by remember { mutableStateOf(false) }
 
@@ -121,7 +119,8 @@ fun QRCodeScanner(
             factory = { context ->
                 val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
                 previewComponent = PreviewView(context).apply {
-                    scaleType = PreviewView.ScaleType.FILL_START
+                    //scaleType = PreviewView.ScaleType.FILL_START
+                    scaleType = PreviewView.ScaleType.FIT_START
                 }
 
                 val imageAnalyzer = IMAGE_ANALYSIS.setAnalyzer(

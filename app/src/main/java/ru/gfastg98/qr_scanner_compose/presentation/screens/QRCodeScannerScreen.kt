@@ -38,12 +38,12 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import org.koin.androidx.compose.koinViewModel
-import ru.gfastg98.qr_scanner_compose.domain.QRCodeScannerViewModel
-import ru.gfastg98.qr_scanner_compose.domain.utils.showBitmapOnActivity
 import ru.gfastg98.qr_scanner_compose.presentation.components.QRCodeScanner
 import ru.gfastg98.qr_scanner_compose.presentation.components.TakePictureButton
 import ru.gfastg98.qr_scanner_compose.presentation.components.rememberQRCodeScannerState
 import ru.gfastg98.qr_scanner_compose.presentation.components.takePictureButtonState
+import ru.gfastg98.qr_scanner_compose.presentation.utils.showBitmapOnActivity
+import ru.gfastg98.qr_scanner_compose.presentation.viewmodel.QRCodeScannerViewModel
 import java.util.concurrent.Executor
 
 private const val TAG = "QRCodeScannerScreen"

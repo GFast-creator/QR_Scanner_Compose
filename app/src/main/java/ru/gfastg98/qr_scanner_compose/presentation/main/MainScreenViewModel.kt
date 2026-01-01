@@ -1,4 +1,4 @@
-package ru.gfastg98.qr_scanner_compose.domain
+package ru.gfastg98.qr_scanner_compose.presentation.main
 
 import android.content.Context
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -12,10 +12,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import ru.gfastg98.qr_scanner_compose.data.AppDatabase
 import ru.gfastg98.qr_scanner_compose.data.entity.QRCodeEntity
-import ru.gfastg98.qr_scanner_compose.domain.utils.showBitmapOnActivity
+import ru.gfastg98.qr_scanner_compose.presentation.utils.showBitmapOnActivity
 
-class QRCodeDatabaseViewModel(
-    val database: AppDatabase
+class MainScreenViewModel(
+    val database: AppDatabase,
 ) : ViewModel() {
     val dao = database.qrCodeDao()
     val table = dao.getAll()
@@ -29,7 +29,7 @@ class QRCodeDatabaseViewModel(
 
     fun fullView(
         context: Context,
-        item: QRCodeEntity
+        item: QRCodeEntity,
     ) {
         val bitmap = item.bitmap.decodeToImageBitmap().asAndroidBitmap()
         showBitmapOnActivity(

@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.toSize
 
@@ -51,7 +50,6 @@ fun TakePictureButton(
     state: TakePictureButtonState = takePictureButtonState(),
 ) {
     val firstColor = MaterialTheme.colorScheme.primary
-    LocalDensity.current
     var size by remember { mutableStateOf(Size.Zero) }
     val animatedSize by animateSizeAsState(
         if (state.isTouched) Size(

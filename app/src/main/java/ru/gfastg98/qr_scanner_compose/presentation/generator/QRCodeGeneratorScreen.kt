@@ -1,4 +1,4 @@
-package ru.gfastg98.qr_scanner_compose.presentation.screens
+package ru.gfastg98.qr_scanner_compose.presentation.generator
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
@@ -35,10 +35,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
-import ru.gfastg98.qr_scanner_compose.domain.QRCodeGeneratorViewModel
-import ru.gfastg98.qr_scanner_compose.domain.utils.showToast
 import ru.gfastg98.qr_scanner_compose.presentation.components.Keyboard
 import ru.gfastg98.qr_scanner_compose.presentation.components.keyboardAsState
+import ru.gfastg98.qr_scanner_compose.presentation.utils.showToast
 
 private const val TAG = "QRCodeGeneratorScreen"
 

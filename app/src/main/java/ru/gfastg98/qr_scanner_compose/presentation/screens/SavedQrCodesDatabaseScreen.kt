@@ -29,9 +29,9 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
-import ru.gfastg98.qr_scanner_compose.domain.QRCodeDatabaseViewModel
 import ru.gfastg98.qr_scanner_compose.presentation.components.QRCodeCard
 import ru.gfastg98.qr_scanner_compose.presentation.components.ScreenScope
+import ru.gfastg98.qr_scanner_compose.presentation.main.MainScreenViewModel
 
 private const val TAG = "DBSaveShowFragment"
 
@@ -44,7 +44,7 @@ fun ScreenScope.SavedQrCodesDatabaseScreen() {
 @Composable
 fun ScreenScope.DatabaseTableScreen(generated: Boolean = false) {
     val context = LocalContext.current
-    val vm = koinViewModel<QRCodeDatabaseViewModel>()
+    val vm = koinViewModel<MainScreenViewModel>()
     val table by remember { vm.queryTable(generated) }.collectAsStateWithLifecycle()
 
     Column {

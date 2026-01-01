@@ -1,4 +1,4 @@
-package ru.gfastg98.qr_scanner_compose.domain.utils
+package ru.gfastg98.qr_scanner_compose.presentation.utils
 
 import android.content.Context
 import android.content.Intent
@@ -10,9 +10,8 @@ import androidmads.library.qrgenearator.QRGSaver
 import androidx.compose.ui.unit.IntRect
 import com.google.gson.Gson
 import com.google.mlkit.vision.barcode.common.Barcode
-import ru.gfastg98.qr_scanner_compose.QRResultActivity
-import ru.gfastg98.qr_scanner_compose.QRResultActivity.Companion.EXTRA_CODE_FORMAT
 import ru.gfastg98.qr_scanner_compose.data.entity.QRCodeEntity
+import ru.gfastg98.qr_scanner_compose.presentation.activity.QRResultActivity
 
 private const val TAG = "BarcodeUtils"
 
@@ -46,10 +45,7 @@ fun showBitmapOnActivity(
     )
 
     context.startActivity(
-        Intent(
-            context,
-            QRResultActivity::class.java
-        )
+        Intent(context, QRResultActivity::class.java)
             .putExtra("file_name", "$filename.png")
             .putExtra("content", barcode.rawValue)
             .putExtra("generated", false)
@@ -68,7 +64,7 @@ fun showBitmapOnActivity(
                     Log.e(TAG, obj)
                 }
             }
-            .putExtra(EXTRA_CODE_FORMAT, barcode.valueType)
+            .putExtra(QRResultActivity.EXTRA_CODE_FORMAT, barcode.valueType)
             .putExtra("view", isView)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     )
@@ -106,16 +102,14 @@ fun showBitmapOnActivity(
     Log.e(TAG, barcode.barcodeObjectJson)
 
     applicationContext.startActivity(
-        Intent(
-            applicationContext,
-            QRResultActivity::class.java
-        )
+        Intent(applicationContext, QRResultActivity::class.java)
             .putExtra("file_name", "intent.png")
             .putExtra("content", barcode.content)
             .putExtra("generated", barcode.generated)
             .putExtra("barcode_obj", barcode.barcodeObjectJson)
-            .putExtra(EXTRA_CODE_FORMAT, barcode.codeFormat)
+            .putExtra(QRResultActivity.EXTRA_CODE_FORMAT, barcode.codeFormat)
             .putExtra("view", isView)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     )
 }
+
