@@ -1,4 +1,4 @@
-package ru.gfastg98.qr_scanner_compose.presentation.activity
+package ru.gfastg98.qr_scanner_compose.presentation.main
 
 import android.os.Bundle
 import android.widget.Toast
@@ -39,7 +39,6 @@ import ru.gfastg98.qr_scanner_compose.R
 import ru.gfastg98.qr_scanner_compose.presentation.components.LocalNavigationState
 import ru.gfastg98.qr_scanner_compose.presentation.components.Screen
 import ru.gfastg98.qr_scanner_compose.presentation.generator.QRCodeGeneratorScreen
-import ru.gfastg98.qr_scanner_compose.presentation.main.MainScreen
 import ru.gfastg98.qr_scanner_compose.presentation.screens.GeneratedQrCodeDatabaseScreen
 import ru.gfastg98.qr_scanner_compose.presentation.screens.QRCodeScannerScreen
 import ru.gfastg98.qr_scanner_compose.presentation.screens.SavedQrCodesDatabaseScreen

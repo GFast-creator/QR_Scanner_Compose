@@ -55,7 +55,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 import ru.gfastg98.qr_scanner_compose.R
-import ru.gfastg98.qr_scanner_compose.presentation.activity.Route
 import ru.gfastg98.qr_scanner_compose.presentation.components.LocalNavigationState
 import ru.gfastg98.qr_scanner_compose.presentation.components.QRCodeCard
 import ru.gfastg98.qr_scanner_compose.presentation.components.ScreenScope

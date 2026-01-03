@@ -8,7 +8,7 @@ import ru.gfastg98.qr_scanner_compose.data.AppDatabase
 import ru.gfastg98.qr_scanner_compose.presentation.generator.QRCodeGeneratorViewModel
 import ru.gfastg98.qr_scanner_compose.presentation.main.MainScreenViewModel
 import ru.gfastg98.qr_scanner_compose.presentation.qr_picker.QrPickerViewModel
-import ru.gfastg98.qr_scanner_compose.presentation.viewmodel.QRCodeResultViewModel
+import ru.gfastg98.qr_scanner_compose.presentation.qr_result.QrResultViewModel
 import ru.gfastg98.qr_scanner_compose.presentation.viewmodel.QRCodeScannerViewModel
 
 val mainModule = module {
@@ -24,7 +24,7 @@ val mainModule = module {
 
     viewModelOf(::MainScreenViewModel)
     viewModelOf(::QRCodeGeneratorViewModel)
-    viewModelOf(::QRCodeResultViewModel)
+    viewModelOf(::QrResultViewModel)
     viewModelOf(::QRCodeScannerViewModel)
     viewModelOf(::QrPickerViewModel)
 }

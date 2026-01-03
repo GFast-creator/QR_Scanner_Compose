@@ -1,11 +1,6 @@
-package ru.gfastg98.qr_scanner_compose
+package ru.gfastg98.qr_scanner_compose.presentation.qr_result
 
-import android.app.Activity
-import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,7 +27,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,49 +37,49 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.decodeToImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
-import com.google.mlkit.vision.barcode.common.Barcode.GeoPoint
-import com.google.mlkit.vision.barcode.common.Barcode.UrlBookmark
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.mlkit.vision.barcode.common.Barcode
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-import ru.gfastg98.qr_scanner_compose.QRResultActivity.Companion.EXTRA_CODE_FORMAT
-import ru.gfastg98.qr_scanner_compose.domain.QRCodeResultViewModel
+import ru.gfastg98.qr_scanner_compose.R
+import ru.gfastg98.qr_scanner_compose.presentation.ObserveAsEvents
 import ru.gfastg98.qr_scanner_compose.presentation.components.QRCodeTypeIcon
 import ru.gfastg98.qr_scanner_compose.presentation.components.Screen
-import ru.gfastg98.qr_scanner_compose.ui.theme.QRScannerTheme
+import ru.gfastg98.qr_scanner_compose.presentation.state.QRCodeResultState
 
-private val TAG = QRResultActivity::class.java.simpleName
+@Composable
+fun QrResultScreen() {
+    val activity = LocalActivity.current
+    val intent = activity?.intent ?: return
+    val viewModel: QrResultViewModel = koinViewModel(parameters = { parametersOf(intent) })
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
-class QRResultActivity : ComponentActivity() {
-    companion object {
-        const val EXTRA_CODE_FORMAT = "code_format"
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            QRScannerTheme {
-                QRCodeViewer()
-            }
+    ObserveAsEvents(viewModel.event) { event ->
+        when (event) {
+            QrResultEvent.Finish -> activity.finish()
         }
     }
+
+    QrResultScreenRoot(
+        state = state,
+        onAction = viewModel::onAction
+    )
 }
 
 @Composable
-private fun QRCodeViewer() = Screen {
+private fun QrResultScreenRoot(
+    state: QRCodeResultState,
+    onAction: (QrResultAction) -> Unit,
+) = Screen {
     val activity = LocalActivity.current
-    LocalWindowInfo.current.containerSize
-    val context = LocalContext.current
+    LocalContext.current
     val intent = activity?.intent ?: return@Screen
 
-    val vm = koinViewModel<QRCodeResultViewModel>(parameters = { parametersOf(intent) })
-    val state by vm.state.collectAsState()
-
     val isForView = remember { intent.getBooleanExtra("view", false) }
-    val type = remember { intent.getIntExtra(EXTRA_CODE_FORMAT, 0) }
+    val type = remember { intent.getIntExtra(QrResultActivity.EXTRA_CODE_FORMAT, 0) }
 
     title = "QR-код"
 
@@ -97,39 +91,35 @@ private fun QRCodeViewer() = Screen {
         ) {
             DropdownMenuItem(
                 leadingIcon = { Icon(Icons.Default.Image, null) },
-                text = { Text("Поделиться картинкой") },
-                onClick = {
-                    vm.shareWithPhoto(context)
-                }
+                text = { Text(stringResource(R.string.QrResult__share_image)) },
+                onClick = { onAction(QrResultAction.ShareImage) }
             )
             DropdownMenuItem(
                 leadingIcon = { Icon(Icons.Default.TextFields, null) },
-                text = { Text("Поделиться текстом") },
-                onClick = {
-                    vm.shareWithText(context)
-                }
+                text = { Text(stringResource(R.string.QrResult__share_text)) },
+                onClick = { onAction(QrResultAction.ShareText) }
             )
         }
 
-        IconButton(onClick = {
-            expanded = !expanded
-        }) {
+        IconButton(
+            onClick = { expanded = !expanded }
+        ) {
             Icon(Icons.Default.Share, null)
         }
     }
 
-    navigationIconAction {
-        activity.finish()
-    }
+    navigationIconAction { activity.finish() }
 
     content {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
         ) {
-            Box(Modifier
-                .padding(20.dp)
-                .fillMaxWidth()) {
+            Box(
+                Modifier
+                    .padding(20.dp)
+                    .fillMaxWidth()
+            ) {
                 Image(
                     bitmap = state.qrCodeEntity.bitmap.decodeToImageBitmap(),
                     contentDescription = "mainImage",
@@ -155,8 +145,12 @@ private fun QRCodeViewer() = Screen {
                 ) {
                     Text(
                         when (val info = state.barcodeInfo) {
-                            is GeoPoint -> {
-                                "Точка на карте\nКоординаты: ${info.lng}, ${info.lat}"
+                            is Barcode.GeoPoint -> {
+                                stringResource(
+                                    R.string.QrResult__point_description,
+                                    info.lng,
+                                    info.lat
+                                )
                             }
 
                             else -> state.qrCodeEntity.content
@@ -170,25 +164,24 @@ private fun QRCodeViewer() = Screen {
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Button(
-                    modifier = Modifier
-                        .weight(1f),
+                    modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(10),
                     onClick = {
-                        vm.copyToClipboard(context)
+                        onAction(QrResultAction.CopyText)
                     }
                 ) {
-                    Text("Скопировать текст")
+                    Text(stringResource(R.string.QrResult__copy_text))
                     Spacer(modifier = Modifier.size(10.dp))
                     Icon(
                         imageVector = Icons.Outlined.TextFields,
-                        contentDescription = "Текст"
+                        contentDescription = "copy text"
                     )
                 }
 
                 Button(
                     shape = RoundedCornerShape(10),
                     onClick = {
-                        vm.copyToClipboardImage(context)
+                        onAction(QrResultAction.CopyImage)
                     }
                 ) {
                     Icon(
@@ -200,47 +193,26 @@ private fun QRCodeViewer() = Screen {
 
             if (!isForView) {
                 Button(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10),
-                    onClick = {
-                        vm.saveToDatabase()
-                        (context as Activity).finish()
-                    }
+                    onClick = { onAction(QrResultAction.Save) }
                 ) {
-                    Text("Сохранить в галерее и закрыть")
+                    Text(stringResource(R.string.QrResult__save_and_close))
                 }
             }
 
-            if (state.barcodeInfo is UrlBookmark || state.barcodeInfo is GeoPoint) {
+            if (state.barcodeInfo is Barcode.UrlBookmark || state.barcodeInfo is Barcode.GeoPoint) {
                 Button(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10),
                     onClick = {
-                        when (val info = state.barcodeInfo) {
-                            is UrlBookmark -> {
-                                context.startActivity(
-                                    Intent(Intent.ACTION_VIEW)
-                                        .setData(info.url!!.toUri())
-                                )
-                            }
-
-                            is GeoPoint -> {
-                                context.startActivity(
-                                    Intent(Intent.ACTION_VIEW)
-                                        .setData(
-                                            "geo:${info.lat},${info.lng}?q=${info.lat},${info.lng}".toUri()
-                                        )
-                                )
-                            }
-                        }
+                        onAction(QrResultAction.Open)
                     }
                 ) {
                     Text(
                         when (state.barcodeInfo) {
-                            is UrlBookmark -> "Открыть ссылку"
-                            else -> "Открыть карту" // GeoPoint
+                            is Barcode.UrlBookmark -> stringResource(R.string.QrResult__open_url)
+                            else -> stringResource(R.string.QrResult__open_map) // GeoPoint
                         }
                     )
                 }
@@ -248,4 +220,3 @@ private fun QRCodeViewer() = Screen {
         }
     }
 }
-

@@ -1,10 +1,12 @@
-package ru.gfastg98.qr_scanner_compose.presentation.activity
+package ru.gfastg98.qr_scanner_compose.presentation
 
+import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,43 +28,50 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import ru.gfastg98.qr_scanner_compose.R
+import ru.gfastg98.qr_scanner_compose.presentation.main.MainActivity
 import ru.gfastg98.qr_scanner_compose.ui.theme.QRScannerTheme
 import kotlin.time.Duration.Companion.seconds
 
-// FIXME : Требуеться большая переработка
 class StartActivity : ComponentActivity() {
-    private val TAG = StartActivity::class.java.simpleName
 
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            Log.i(TAG, "Permission granted")
-            lifecycleScope.launch {
-                delay(3.seconds)
-                navigateToMainActivity()
+    private val permissionsToRequest: Array<String>
+        get() {
+            val permissions = mutableListOf(
+                Manifest.permission.CAMERA,
+                Manifest.permission.RECORD_AUDIO
+            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissions.add(Manifest.permission.POST_NOTIFICATIONS)
             }
-        } else {
-            Log.i(TAG, "Permission denied")
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+            return permissions.toTypedArray()
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent { StartScreen() }
     }
 
     @Composable
     private fun StartScreen() {
         QRScannerTheme {
-            var openAlertDialog by remember { mutableStateOf(false) }
+            var permissionsGranted by remember { mutableStateOf(checkAllPermissionsGranted()) }
+            var showDialog by remember { mutableStateOf(!permissionsGranted) }
+
+            val launcher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestMultiplePermissions()
+            ) { permissions ->
+                val allGranted = permissions.entries.all { it.value }
+                permissionsGranted = allGranted
+                if (!allGranted) {
+                    showDialog = true
+                }
+            }
 
             Surface(
                 modifier = Modifier.fillMaxSize(),
@@ -71,26 +80,29 @@ class StartActivity : ComponentActivity() {
                 Icon(imageVector = Icons.Sharp.Android, contentDescription = "Logo")
             }
 
-            if (!checkCameraPermission()) {
-                if (openAlertDialog) {
+            if (permissionsGranted) {
+                LaunchedEffect(Unit) {
+                    delay(1.seconds)
+                    navigateToMainActivity()
+                }
+            } else {
+                if (showDialog) {
                     AlertDialog(
                         icon = {
                             Icon(Icons.Default.QuestionMark, null)
                         },
                         title = {
-                            Text(text = stringResource(R.string.StartActivity__dialog_title))
+                            Text(stringResource(R.string.StartActivity__dialog_title))
                         },
                         text = {
                             Text(stringResource(R.string.StartActivity__dialog_substring))
                         },
-                        onDismissRequest = {
-                            openAlertDialog = false
-                        },
+                        onDismissRequest = { showDialog = false },
                         confirmButton = {
                             TextButton(
                                 onClick = {
-                                    requestCameraPermission()
-                                    openAlertDialog = false
+                                    showDialog = false
+                                    launcher.launch(permissionsToRequest)
                                 }
                             ) {
                                 Text(stringResource(R.string.StartActivity_continue))
@@ -102,32 +114,13 @@ class StartActivity : ComponentActivity() {
                         )
                     )
                 }
-            } else {
-                LaunchedEffect(Unit) {
-                    navigateToMainActivity()
-                }
             }
         }
     }
 
-    private fun checkCameraPermission(): Boolean = ContextCompat.checkSelfPermission(
-        this,
-        android.Manifest.permission.CAMERA
-    ) == PackageManager.PERMISSION_GRANTED
-
-    private fun requestCameraPermission() {
-        when {
-            checkCameraPermission() -> {
-                Log.i(TAG, "Permission previously granted")
-                return
-            }
-
-            ActivityCompat.shouldShowRequestPermissionRationale(
-                this,
-                android.Manifest.permission.CAMERA
-            ) -> Log.i(TAG, "Show camera permissions dialog")
-
-            else -> requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+    private fun checkAllPermissionsGranted(): Boolean {
+        return permissionsToRequest.all {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
         }
     }
 
@@ -136,4 +129,3 @@ class StartActivity : ComponentActivity() {
         finish()
     }
 }
-
