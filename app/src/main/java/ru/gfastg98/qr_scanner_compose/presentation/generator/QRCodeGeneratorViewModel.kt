@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.gfastg98.qr_scanner_compose.domain.utils.throttleFist
-import ru.gfastg98.qr_scanner_compose.presentation.activity.QRResultActivity
+import ru.gfastg98.qr_scanner_compose.presentation.qr_result.QrResultActivity
 
 class QRCodeGeneratorViewModel : ViewModel() {
     companion object {
@@ -70,12 +70,12 @@ class QRCodeGeneratorViewModel : ViewModel() {
         context.startActivity(
             Intent(
                 context,
-                QRResultActivity::class.java
+                QrResultActivity::class.java
             )
                 .putExtra("file_name", "$filename.png")
                 .putExtra("content", content)
                 .putExtra("generated", true)
-                .putExtra(QRResultActivity.EXTRA_CODE_FORMAT, Barcode.TYPE_TEXT)
+                .putExtra(QrResultActivity.EXTRA_CODE_FORMAT, Barcode.TYPE_TEXT)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         )
     }

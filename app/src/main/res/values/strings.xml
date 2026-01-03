@@ -14,4 +14,12 @@
     <string name="LoadingDialog__loading">Загрузка...</string>
     <string name="QrPicker__no_qr_codes_on_photo">Не найдено фото qr-кода</string>
     <string name="QrPicker__error_while_processing">Ошибка при обработке</string>
+
+    <string name="QrResult__share_text">Поделиться текстом</string>
+    <string name="QrResult__share_image">Отправить QR-код</string>
+    <string name="QrResult__point_description">Точка на карте\nКоординаты: %1$d, %2$d</string>
+    <string name="QrResult__copy_text">Скопировать текст</string>
+    <string name="QrResult__save_and_close">Сохранить в галерее и закрыть</string>
+    <string name="QrResult__open_url">Открыть ссылку</string>
+    <string name="QrResult__open_map">Открыть карту</string>
 </resources>
