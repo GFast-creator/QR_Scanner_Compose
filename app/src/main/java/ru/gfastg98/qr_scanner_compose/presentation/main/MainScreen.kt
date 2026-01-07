@@ -1,6 +1,5 @@
 package ru.gfastg98.qr_scanner_compose.presentation.main
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -39,7 +38,6 @@ import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,26 +47,40 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 import ru.gfastg98.qr_scanner_compose.R
+import ru.gfastg98.qr_scanner_compose.presentation.ObserveAsEvents
 import ru.gfastg98.qr_scanner_compose.presentation.components.LocalNavigationState
 import ru.gfastg98.qr_scanner_compose.presentation.components.QRCodeCard
 import ru.gfastg98.qr_scanner_compose.presentation.components.ScreenScope
 
 private const val TAG = "MainScreen"
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ScreenScope.MainScreen() {
     val navigator = LocalNavigationState.current
-    val context = LocalContext.current
+    val viewModel = koinViewModel<MainScreenViewModel>()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
-    val vm = koinViewModel<MainScreenViewModel>()
-    val table by vm.table.collectAsStateWithLifecycle()
+    ObserveAsEvents(viewModel.event) { event ->
+        when (event) {
+            MainScreenEvent.NavigateToGenerator -> navigator.navigate(Route.Generator)
+            MainScreenEvent.NavigateToScanner -> navigator.navigate(Route.Scanner)
+        }
+    }
+
+    MainScreenRoot(state, viewModel::onAction)
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun ScreenScope.MainScreenRoot(
+    state: MainScreenState,
+    onAction: (MainScreenAction) -> Unit,
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -88,19 +100,19 @@ fun ScreenScope.MainScreen() {
                 FloatingActionButtonMenuItem(
                     text = { Text(stringResource(R.string.generator)) },
                     icon = { Icon(Icons.Default.AddHome, null) },
-                    onClick = { navigator.navigate(Route.Generator) }
+                    onClick = { onAction(MainScreenAction.ToGenerator) }
                 )
                 FloatingActionButtonMenuItem(
                     text = { Text(stringResource(R.string.scanner)) },
                     icon = { Icon(Icons.Default.CameraAlt, null) },
-                    onClick = { navigator.navigate(Route.Scanner) }
+                    onClick = { onAction(MainScreenAction.ToScanner) }
                 )
             }
         },
         containerColor = Color.Transparent
     ) { paddings ->
         Column(Modifier.padding(paddings)) {
-            if (table.isEmpty()) {
+            if (state.table.isEmpty()) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
@@ -111,25 +123,15 @@ fun ScreenScope.MainScreen() {
                         contentDescription = null,
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
                     )
-                    Text("Нет сохраннённых QR-кодов")
+                    Text(stringResource(R.string.MainScreen__no_qr_codes))
                 }
             } else {
-                var selectedItems = remember { mutableStateListOf<Int>() }
-                BackHandler(selectedItems.isNotEmpty()) { selectedItems.clear() }
-                LaunchedEffect(selectedItems) {
+                BackHandler(state.selected.isNotEmpty()) { onAction(MainScreenAction.UnselectAll) }
+                LaunchedEffect(state.selected) {
                     actions {
-                        if (selectedItems.isNotEmpty()) {
+                        if (state.selected.isNotEmpty()) {
                             IconButton(
-                                onClick = {
-                                    vm.deleteAll(
-                                        selectedItems.mapNotNull { id ->
-                                            table.find { i ->
-                                                i.uid == id
-                                            }
-                                        }
-                                    )
-                                    selectedItems.clear()
-                                }
+                                onClick = { onAction(MainScreenAction.DeleteSelected) }
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
@@ -145,23 +147,22 @@ fun ScreenScope.MainScreen() {
                     verticalItemSpacing = 4.dp,
                     columns = StaggeredGridCells.Fixed(3)
                 ) {
-                    items(table, key = { it.uid }) { item ->
+                    items(state.table, key = { it.uid }) { item ->
                         QRCodeCard(
                             item = item,
-                            isSelected = selectedItems.contains(item.uid),
+                            isSelected = state.selected == item,
                             onLongClick = {
-                                if (selectedItems.isEmpty()) {
-                                    selectedItems += item.uid
+                                if (state.selected.isEmpty()) {
+                                    onAction(MainScreenAction.Select(item))
                                 }
                             },
                             onClick = {
-                                if (selectedItems.isNotEmpty()) {
-                                    if (selectedItems.contains(item.uid))
-                                        selectedItems -= item.uid
-                                    else selectedItems += item.uid
-                                    Log.i(TAG, selectedItems.joinToString(", "))
+                                if (state.selected.isNotEmpty()) {
+                                    if (state.selected.contains(item))
+                                        onAction(MainScreenAction.Unselect(item))
+                                    else onAction(MainScreenAction.Select(item))
                                 } else {
-                                    vm.fullView(context, item)
+                                    onAction(MainScreenAction.Open(item))
                                 }
                             }
                         )

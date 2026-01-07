@@ -1,7 +1,6 @@
 package ru.gfastg98.qr_scanner_compose.presentation.main
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
@@ -39,9 +38,10 @@ import ru.gfastg98.qr_scanner_compose.R
 import ru.gfastg98.qr_scanner_compose.presentation.components.LocalNavigationState
 import ru.gfastg98.qr_scanner_compose.presentation.components.Screen
 import ru.gfastg98.qr_scanner_compose.presentation.generator.QRCodeGeneratorScreen
+import ru.gfastg98.qr_scanner_compose.presentation.scanner.QrCodeScannerScreen
 import ru.gfastg98.qr_scanner_compose.presentation.screens.GeneratedQrCodeDatabaseScreen
-import ru.gfastg98.qr_scanner_compose.presentation.screens.QRCodeScannerScreen
 import ru.gfastg98.qr_scanner_compose.presentation.screens.SavedQrCodesDatabaseScreen
+import ru.gfastg98.qr_scanner_compose.presentation.utils.showToast
 import ru.gfastg98.qr_scanner_compose.ui.theme.QRScannerTheme
 
 class MainActivity : ComponentActivity() {
@@ -110,8 +110,7 @@ private fun MainActivityScreen() {
 
             BackHandler {
                 if (!doubleTouch) {
-                    Toast.makeText(context, "Нажмите ещё раз чтобы выйти...", Toast.LENGTH_LONG)
-                        .show()
+                    context.showToast(R.string.tap_again_to_exit)
                     doubleTouch = true
                 } else {
                     activity?.finish()
@@ -125,10 +124,12 @@ private fun MainActivityScreen() {
                     startDestination = Route.MainScreen
                 ) {
                     composable(Route.MainScreen::class) { MainScreen() }
-                    composable(Route.Scanner::class) { QRCodeScannerScreen() }
+                    composable(Route.Scanner::class) { QrCodeScannerScreen() }
                     composable(Route.Generator::class) { QRCodeGeneratorScreen() }
-                    composable(Route.DatabaseScanned::class) { SavedQrCodesDatabaseScreen() }
                     composable(Route.DatabaseGenerated::class) { GeneratedQrCodeDatabaseScreen() }
+
+                    // noop
+                    composable(Route.DatabaseScanned::class) { SavedQrCodesDatabaseScreen() }
                 }
             }
         }
