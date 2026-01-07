@@ -119,7 +119,7 @@ fun QRCodeScanner(
                 .fillMaxSize(),
             factory = { context ->
                 val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-                PreviewView(context).apply {
+                previewComponent = PreviewView(context).apply {
                     scaleType = PreviewView.ScaleType.FIT_START
                 }
 

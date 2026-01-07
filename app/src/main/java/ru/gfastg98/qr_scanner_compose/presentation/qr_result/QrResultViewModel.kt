@@ -19,7 +19,6 @@ import ru.gfastg98.qr_scanner_compose.data.AppDatabase
 import ru.gfastg98.qr_scanner_compose.data.entity.readQrCodeEntity
 import ru.gfastg98.qr_scanner_compose.domain.utils.processQRCodeInfo
 import ru.gfastg98.qr_scanner_compose.presentation.BaseViewModel
-import ru.gfastg98.qr_scanner_compose.presentation.state.QRCodeResultState
 import ru.gfastg98.qr_scanner_compose.presentation.utils.provideUri
 import ru.gfastg98.qr_scanner_compose.presentation.utils.showToast
 import java.io.File
@@ -28,7 +27,7 @@ class QrResultViewModel(
     val application: Context,
     val intent: Intent,
     private val db: AppDatabase,
-) : BaseViewModel<QRCodeResultState, QrResultEvent, QrResultAction>(QRCodeResultState()) {
+) : BaseViewModel<QrResultState, QrResultEvent, QrResultAction>(QrResultState()) {
     private val clipboardManager = requireNotNull(application.getSystemService<ClipboardManager>())
 
     override fun onAction(action: QrResultAction) {
@@ -54,8 +53,8 @@ class QrResultViewModel(
         val qrCodeEntity = intent.readQrCodeEntity(application)
         val barcodeInfo = qrCodeEntity.processQRCodeInfo()
 
-        currentState.value = QRCodeResultState(
-            QRCodeResultState.Status.READY,
+        currentState.value = QrResultState(
+            QrResultState.Status.READY,
             qrCodeEntity,
             barcodeInfo,
             file

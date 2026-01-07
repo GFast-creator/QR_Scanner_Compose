@@ -48,7 +48,6 @@ import ru.gfastg98.qr_scanner_compose.R
 import ru.gfastg98.qr_scanner_compose.presentation.ObserveAsEvents
 import ru.gfastg98.qr_scanner_compose.presentation.components.QRCodeTypeIcon
 import ru.gfastg98.qr_scanner_compose.presentation.components.Screen
-import ru.gfastg98.qr_scanner_compose.presentation.state.QRCodeResultState
 
 @Composable
 fun QrResultScreen() {
@@ -71,7 +70,7 @@ fun QrResultScreen() {
 
 @Composable
 private fun QrResultScreenRoot(
-    state: QRCodeResultState,
+    state: QrResultState,
     onAction: (QrResultAction) -> Unit,
 ) = Screen {
     val activity = LocalActivity.current

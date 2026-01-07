@@ -22,4 +22,6 @@
     <string name="QrResult__save_and_close">Сохранить в галерее и закрыть</string>
     <string name="QrResult__open_url">Открыть ссылку</string>
     <string name="QrResult__open_map">Открыть карту</string>
+    <string name="MainScreen__no_qr_codes">Нет сохраннённых QR-кодов</string>
+    <string name="tap_again_to_exit">Нажмите ещё раз чтобы выйти...</string>
 </resources>

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import ru.gfastg98.qr_scanner_compose.data.entity.QRCodeEntity
 import ru.gfastg98.qr_scanner_compose.ui.theme.QRScannerTheme
 
 private val TAG = QrResultActivity::class.java.simpleName
@@ -62,6 +63,15 @@ class QrResultActivity : ComponentActivity() {
         fun setIsView(isView: Boolean): IntentBuilder {
             intent.putExtra(EXTRA_VIEW, isView)
             return this
+        }
+
+        fun readBarcodeEntity(barcode: QRCodeEntity): IntentBuilder {
+            return apply {
+                setContent(barcode.content)
+                setGenerated(barcode.generated)
+                setBarcodeObjectJson(barcode.barcodeObjectJson)
+                setCodeFormat(barcode.codeFormat)
+            }
         }
 
         fun build(): Intent = intent
