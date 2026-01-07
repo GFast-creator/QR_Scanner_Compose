@@ -3,6 +3,7 @@ package ru.gfastg98.qr_scanner_compose.presentation.utils
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -22,13 +23,13 @@ import androidx.compose.ui.unit.dp
 import ru.gfastg98.qr_scanner_compose.domain.utils.moveTo
 
 private val path = Path()
+private val path1 = Path()
 
 /**
  * Функция отрисовки обводки QR-кода
  */
-fun ContentDrawScope.drawBarcodeSelection(rect: Rect, isScanning: Boolean) {
+fun ContentDrawScope.drawBarcodeSelection(rect: Rect, isScanning: Boolean, primaryColor: Color) {
     val rad = 100.dp.toPx() * (rect.size.minDimension / 200.dp.toPx())
-    20.dp
 
     if (isScanning) {
         path.apply {
@@ -37,7 +38,8 @@ fun ContentDrawScope.drawBarcodeSelection(rect: Rect, isScanning: Boolean) {
             addRect(Rect(Offset.Zero, size))
             // Вырезаем внутренний прямоугольник со скруглениями
             op(
-                Path().apply {
+                path1.apply {
+                    reset()
                     addRoundRect(
                         RoundRect(
                             rect,
@@ -51,7 +53,7 @@ fun ContentDrawScope.drawBarcodeSelection(rect: Rect, isScanning: Boolean) {
 
             drawPath(
                 path = this,
-                color = Color.Black.copy(0.5f) // Цвет внешнего прямоугольника
+                color = primaryColor.copy(0.5f) // Цвет внешнего прямоугольника
             )
         }
     }
@@ -68,7 +70,8 @@ fun ContentDrawScope.drawBarcodeSelection(rect: Rect, isScanning: Boolean) {
         arcTo(Rect(rect.bottomLeft + Offset(0f, -rad), Size(rad, rad)), 90f, 90f, false)
 
         drawPath(
-            this, Color.White,
+            this,
+            primaryColor,
             style = Stroke(
                 width = 15f,
                 cap = StrokeCap.Round
@@ -80,6 +83,7 @@ fun ContentDrawScope.drawBarcodeSelection(rect: Rect, isScanning: Boolean) {
 @Preview
 @Composable
 private fun DrawBarcodeSelectionPreview(isScanning: Boolean = true) {
+    val primaryColor = MaterialTheme.colorScheme.primary
     Box(
         Modifier
             .background(Color.Gray)
@@ -87,7 +91,7 @@ private fun DrawBarcodeSelectionPreview(isScanning: Boolean = true) {
                 drawContent()
                 val offset = Offset(size.width / 4f, size.height / 4f)
                 val rect = Rect(offset, size.div(2f))
-                drawBarcodeSelection(rect, true)
+                drawBarcodeSelection(rect, true, primaryColor)
             }
             .size(300.dp)
     )

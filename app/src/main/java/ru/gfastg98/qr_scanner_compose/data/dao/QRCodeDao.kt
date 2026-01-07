@@ -12,7 +12,10 @@ import ru.gfastg98.qr_scanner_compose.data.entity.QRCodeEntity.Companion.TABLE_N
 @Dao
 interface QRCodeDao {
     @Query("SELECT * FROM $TABLE_NAME")
-    fun getAll(): Flow<List<QRCodeEntity>>
+    fun getAll(): List<QRCodeEntity>
+
+    @Query("SELECT * FROM $TABLE_NAME")
+    fun getAllFlowed(): Flow<List<QRCodeEntity>>
 
     @Query("SELECT * FROM $TABLE_NAME WHERE uid IN (:userIds)")
     fun loadAllByIds(vararg userIds: Int): Flow<List<QRCodeEntity>>
