@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.IntRect
 import com.google.gson.Gson
 import com.google.mlkit.vision.barcode.common.Barcode
 import ru.gfastg98.qr_scanner_compose.data.entity.QRCodeEntity
+import ru.gfastg98.qr_scanner_compose.presentation.Defaults
 import ru.gfastg98.qr_scanner_compose.presentation.qr_result.QrResultActivity
 
 private const val TAG = "BarcodeUtils"
@@ -31,18 +32,18 @@ fun showBitmapOnActivity(
     )
 
     val filename = "intent"
-    Log.i(
-        TAG,
-        if (QRGSaver().save(
-                context.getExternalFilesDir(
-                    Environment.DIRECTORY_PICTURES
-                )!!.path + "/QRCODES/",
-                filename,
-                resultBitmap,
-                QRGContents.ImageType.IMAGE_PNG
-            )
-        ) "saved" else "no save"
+
+    val result = QRGSaver().save(
+        context.getExternalFilesDir(
+            Environment.DIRECTORY_PICTURES
+        )!!.path + "/QRCODES/",
+        filename,
+        resultBitmap,
+        QRGContents.ImageType.IMAGE_PNG
     )
+    Log.i(TAG, if (result) "saved" else "not saved")
+
+    if (!result) return
 
     context.startActivity(
         Intent(context, QrResultActivity::class.java)
@@ -50,7 +51,7 @@ fun showBitmapOnActivity(
             .putExtra("content", barcode.rawValue)
             .putExtra("generated", false)
             .apply {
-                when (barcode.valueType) {
+                val obj = when (barcode.valueType) {
                     Barcode.TYPE_CONTACT_INFO -> Gson().toJson(barcode.contactInfo)
                     Barcode.TYPE_WIFI -> Gson().toJson(barcode.wifi)
                     Barcode.TYPE_PHONE -> Gson().toJson(barcode.phone)
@@ -58,11 +59,11 @@ fun showBitmapOnActivity(
                     Barcode.TYPE_EMAIL -> Gson().toJson(barcode.email)
                     Barcode.TYPE_GEO -> Gson().toJson(barcode.geoPoint)
                     Barcode.TYPE_CALENDAR_EVENT -> Gson().toJson(barcode.calendarEvent)
-                    else -> null
-                }?.let { obj ->
-                    putExtra("barcode_obj", obj)
-                    Log.e(TAG, obj)
+                    else -> return@apply
                 }
+
+                putExtra("barcode_obj", obj)
+                Log.e(TAG, obj)
             }
             .putExtra(QrResultActivity.EXTRA_CODE_FORMAT, barcode.valueType)
             .putExtra("view", isView)
@@ -101,7 +102,7 @@ fun showBitmapOnActivity(
 
     Log.e(TAG, barcode.barcodeObjectJson)
 
-    applicationContext.startActivity(
+    /*applicationContext.startActivity(
         Intent(applicationContext, QrResultActivity::class.java)
             .putExtra("file_name", "intent.png")
             .putExtra("content", barcode.content)
@@ -109,7 +110,12 @@ fun showBitmapOnActivity(
             .putExtra("barcode_obj", barcode.barcodeObjectJson)
             .putExtra(QrResultActivity.EXTRA_CODE_FORMAT, barcode.codeFormat)
             .putExtra("view", isView)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    )
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)*/
+
+    QrResultActivity.IntentBuilder(applicationContext)
+        .setFileName(Defaults.QRCODE_FILE_NAME)
+        .readBarcodeEntity(barcode)
+        .setIsView(isView)
+        .launch()
 }
 
