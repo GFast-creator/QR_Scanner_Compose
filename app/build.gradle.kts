@@ -92,7 +92,7 @@ dependencies {
 
     // qr codes
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
-    implementation("com.github.androidmads:QRGenerator:1.0.1")
+    implementation("com.github.androidmads:QRGenerator:1.0.5")
 
     // room
     val roomVersion = "2.7.1"
