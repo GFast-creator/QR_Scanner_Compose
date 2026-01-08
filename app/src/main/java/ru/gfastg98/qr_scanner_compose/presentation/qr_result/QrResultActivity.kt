@@ -75,7 +75,6 @@ class QrResultActivity : ComponentActivity() {
         }
 
         fun build(): Intent = intent
-
         fun launch() = context.startActivity(intent)
     }
 }
