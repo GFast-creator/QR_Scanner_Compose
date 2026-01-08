@@ -37,7 +37,7 @@ import kotlinx.serialization.Serializable
 import ru.gfastg98.qr_scanner_compose.R
 import ru.gfastg98.qr_scanner_compose.presentation.components.LocalNavigationState
 import ru.gfastg98.qr_scanner_compose.presentation.components.Screen
-import ru.gfastg98.qr_scanner_compose.presentation.generator.QRCodeGeneratorScreen
+import ru.gfastg98.qr_scanner_compose.presentation.generator.QrGeneratorScreen
 import ru.gfastg98.qr_scanner_compose.presentation.scanner.QrCodeScannerScreen
 import ru.gfastg98.qr_scanner_compose.presentation.screens.GeneratedQrCodeDatabaseScreen
 import ru.gfastg98.qr_scanner_compose.presentation.screens.SavedQrCodesDatabaseScreen
@@ -125,7 +125,7 @@ private fun MainActivityScreen() {
                 ) {
                     composable(Route.MainScreen::class) { MainScreen() }
                     composable(Route.Scanner::class) { QrCodeScannerScreen() }
-                    composable(Route.Generator::class) { QRCodeGeneratorScreen() }
+                    composable(Route.Generator::class) { QrGeneratorScreen() }
                     composable(Route.DatabaseGenerated::class) { GeneratedQrCodeDatabaseScreen() }
 
                     // noop

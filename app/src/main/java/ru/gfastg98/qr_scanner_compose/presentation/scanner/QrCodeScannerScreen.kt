@@ -24,12 +24,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.common.util.concurrent.HandlerExecutor
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -86,14 +91,44 @@ fun QrCodeScannerScreenRoot(
 
         Detections(state.barcodeDetections)
 
-        Box(
+        Column(
             Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
         ) {
+
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                val lifecycleOwner = LocalLifecycleOwner.current
+
+                val camera = qrCodeCameraState.camera ?: return@Row
+                val control = remember(camera) { camera.cameraControl }
+
+                var min by remember { mutableStateOf(1f) }
+                var max by remember { mutableStateOf(1f) }
+                var current by remember { mutableStateOf(1f) }
+
+                LaunchedEffect(qrCodeCameraState.camera) {
+                    val info = camera.cameraInfo
+
+                    info.zoomState.observe(lifecycleOwner) { zoomState ->
+                        min = zoomState.minZoomRatio
+                        max = zoomState.maxZoomRatio
+                        current = zoomState.zoomRatio
+                    }
+                }
+
+                CameraZoomControl(
+                    modifier = Modifier.fillMaxWidth(),
+                    selectedZoom = current,
+                    minZoom = { min },
+                    maxZoom = { max },
+                    onCheckedZoom = { control.setZoomRatio(it.coerceIn(min..max)) }
+                )
+            }
             Row(
                 Modifier
                     .padding(20.dp)
-                    .align(Alignment.BottomCenter)
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
